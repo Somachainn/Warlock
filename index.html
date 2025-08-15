@@ -86,9 +86,168 @@
   .send-row{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
   @media (max-width:640px){ .send-row{ grid-template-columns:1fr; } }
 
-  /* Trading Panels Styles */
-  .trade-panels {
+  /* New Trade UI Styles */
+  .trade-card {
+      padding: 0;
+      overflow: hidden;
+  }
+  .trade-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line);
+  }
+  .trade-header h3 {
+      margin: 0;
+      font-size: 1.2rem;
+  }
+  .trade-header .icon {
+      font-size: 1.5rem;
+      cursor: pointer;
+  }
+  .trade-asset-selector {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: #f8f9fa;
+  }
+  .asset-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+  }
+  .asset-box img { width: 24px; height: 24px; }
+  .asset-box div { text-align: left; }
+  .asset-box .asset-name { font-weight: 600; }
+  .asset-box .asset-issuer { font-size: 0.8rem; color: var(--muted); }
+  .swap-icon {
+      font-size: 1.5rem;
+      background: white;
+      border-radius: 50%;
+      padding: 5px;
+      border: 1px solid var(--line);
+      cursor: pointer;
+  }
+  .trade-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--line);
+  }
+  .trade-tabs .tab {
+      flex: 1;
+      padding: 12px;
+      text-align: center;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--muted);
+      border-bottom: 3px solid transparent;
+  }
+  .trade-tabs .tab.active {
+      color: var(--brand);
+      border-bottom-color: var(--brand);
+  }
+  .orderbook-content {
+      padding: 10px 20px 20px;
+  }
+  .orderbook-table {
+      width: 100%;
+      border-collapse: collapse;
+  }
+  .orderbook-table th, .orderbook-table td {
+      text-align: right;
+      padding: 8px 4px;
+      font-size: 0.9rem;
+  }
+  .orderbook-table th {
+      color: var(--muted);
+      font-weight: normal;
+  }
+  .orderbook-table th:first-child, .orderbook-table td:first-child { text-align: left; }
+  .orderbook-table .bid-row td:nth-child(2) { color: var(--ok); }
+  .orderbook-table .ask-row td:nth-child(2) { color: var(--err); }
+  .spread {
+      padding: 12px 0;
+      text-align: center;
+      font-weight: bold;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      margin: 8px 0;
+  }
+  .trade-actions {
+      display: flex;
+      gap: 15px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-top: 1px solid var(--line);
+  }
+  .trade-actions button {
+      flex: 1;
+      padding: 14px;
+      font-size: 1.1rem;
+      border-radius: 12px;
+      text-transform: uppercase;
+  }
+  .btn-buy { background-color: var(--ok); box-shadow: 0 4px 14px rgba(40, 167, 69, 0.3); }
+  .btn-buy:hover { background-color: #218838; }
+  .btn-sell { background-color: #e0e0e0; color: var(--text); box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
+  .btn-sell:hover { background-color: #d5d5d5; }
+
+  /* Trading Modal Styles */
+  .trade-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  .trade-modal.show {
+    display: flex;
+  }
+  .modal-content {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--rad);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    padding: 20px;
+    max-width: 400px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .modal-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--brand);
+    margin: 0;
+  }
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--muted);
     padding: 0;
+    width: auto;
+    height: auto;
+    box-shadow: none;
+    text-transform: none;
+  }
+  .modal-close:hover {
+    color: var(--text);
+    transform: none;
+    box-shadow: none;
   }
   .panel {
     background: #f8f9fa;
@@ -275,85 +434,125 @@
         </div>
       </div>
 
-      <!-- Trading Panels -->
-      <div class="card trade-panels grid-2">
-        <!-- BUY -->
-        <div class="panel">
-          <div class="titleRow">
-            <div class="title">Buy Laam</div>
-            <div class="avail">Available: <span id="availXLM">0 XLM</span> <i></i></div>
+      <!-- New Trade UI -->
+      <div class="card trade-card">
+          <div class="trade-header">
+              <span class="icon">←</span>
+              <h3>Trade</h3>
+              <span class="icon" onclick="loadOrderbook()">↻</span>
           </div>
-
-          <div class="field">
-            <div class="inputWrap">
-              <input id="buyPrice" type="number" step="0.0000001" placeholder="0.135" />
-              <div class="unit">XLM</div>
-            </div>
-            <div class="hint">Price (XLM per Laam)</div>
+          <div class="trade-asset-selector">
+              <div class="asset-box">
+                  <img src="https://i.ibb.co/r28SP1bN/20250802-225108.png" alt="Laam">
+                  <div>
+                      <div class="asset-name">Laam</div>
+                      <div class="asset-issuer">laam.online</div>
+                  </div>
+              </div>
+              <span class="swap-icon" id="swapAssets">⇄</span>
+              <div class="asset-box">
+                  <img src="https://res.coinpaper.com/coinpaper/stellar_xlm_logo_07021d63c0.png" alt="XLM">
+                  <div>
+                      <div class="asset-name">XLM</div>
+                      <div class="asset-issuer">stellar.org</div>
+                  </div>
+              </div>
           </div>
-
-          <div class="field">
-            <div class="inputWrap">
-              <input id="buyAmt" type="number" step="0.0000001" placeholder="Amount" />
-              <div class="unit">Laam</div>
+          <div class="trade-tabs">
+              <div class="tab" id="overviewTab">Overview</div>
+              <div class="tab active" id="orderbookTab">Orderbook</div>
+              <div class="tab" id="lastTradesTab">Last Trades</div>
+          </div>
+          <div class="orderbook-content" id="orderbookContent">
+              <table class="orderbook-table">
+                  <thead>
+                      <tr>
+                          <th>Amount (Laam)</th>
+                          <th>Price (XLM)</th>
+                          <th>Total (XLM)</th>
+                      </tr>
+                  </thead>
+                  <tbody id="asksBody">
+                      <!-- Asks (Sell offers) will be populated here -->
+                  </tbody>
+              </table>
+              <div class="spread" id="spreadValue">0.13499</div>
+              <table class="orderbook-table">
+                  <tbody id="bidsBody">
+                      <!-- Bids (Buy offers) will be populated here -->
+                  </tbody>
+              </table>
+          </div>
+          <div id="overviewContent" style="display:none; padding: 10px 20px 20px;">
+            <div style="font-size: 2.5rem; font-weight: bold; text-align: center; margin-bottom: 10px;"><span id="overviewLaamPriceXLM">0.00000</span> XLM</div>
+            <div style="text-align: center; color: var(--muted); font-size: 0.9rem; margin-bottom: 20px;">Laam price August 14, 2025 04:51 AM</div>
+            <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
+              <button class="btn-secondary" style="flex: 0 1 auto; padding: 8px 15px; border-radius: 8px;">1D</button>
+              <button class="btn-secondary" style="flex: 0 1 auto; padding: 8px 15px; border-radius: 8px;">1W</button>
+              <button class="btn-secondary" style="flex: 0 1 auto; padding: 8px 15px; border-radius: 8px;">1M</button>
+              <button class="btn-secondary" style="flex: 0 1 auto; padding: 8px 15px; border-radius: 8px;">1Y</button>
             </div>
-            <div class="rowBtns">
-              <button data-fill="25" data-side="buy">25%</button>
-              <button data-fill="50" data-side="buy">50%</button>
-              <button data-fill="75" data-side="buy">75%</button>
-              <button data-fill="100" data-side="buy">100%</button>
+            <div style="width: 100%; height: 200px; background-color: #f0f0f0; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; color: var(--muted);">[Graph Placeholder]</div>
+            <div style="display: flex; justify-content: space-around; font-size: 0.8rem; color: var(--muted);">
+              <span>3 AM</span><span>3 AM</span><span>3 AM</span><span>4 AM</span><span>4 AM</span><span>4 AM</span><span>4 AM</span>
             </div>
           </div>
-
-          <div class="totalBox">
-            <div class="inputWrap">
-              <input id="buyTotal" type="number" step="0.0000001" placeholder="0.0000000" disabled />
-              <div class="unit">XLM</div>
-            </div>
-            <div class="hint">Total XLM you'll pay</div>
+          <div id="lastTradesContent" style="display:none; padding: 10px 20px 20px;">
+            <p>This is the Last Trades content. A list of your recent trades will appear here.</p>
           </div>
+          <div class="trade-actions">
+              <button class="btn-buy" id="btnBuy">Buy</button>
+              <button class="btn-sell" id="btnSell">Sell</button>
+          </div>
+      </div>
+    </div>
+  </div>
 
-          <button class="cta buy" id="btnBuy">Buy Laam</button>
+  <!-- Trade Modal -->
+  <div id="tradeModal" class="trade-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">Buy Laam</h3>
+        <button class="modal-close" onclick="closeTradeModal()">&times;</button>
+      </div>
+      
+      <!-- Trading Panel -->
+      <div class="panel">
+        <div class="titleRow">
+          <div class="title" id="panelTitle">Buy Laam</div>
+          <div class="avail">Available: <span id="availBalance">0 XLM</span></div>
         </div>
 
-        <!-- SELL -->
-        <div class="panel">
-          <div class="titleRow">
-            <div class="title">Sell Laam</div>
-            <div class="avail">Available: <span id="availLAAM">0 Laam</span> <i></i></div>
+        <div class="field">
+          <div class="inputWrap">
+            <input id="modalPrice" type="number" step="0.0000001" placeholder="0.135" />
+            <div class="unit">XLM</div>
           </div>
-
-          <div class="field">
-            <div class="inputWrap">
-              <input id="sellPrice" type="number" step="0.0000001" placeholder="0.135" />
-              <div class="unit">XLM</div>
-            </div>
-            <div class="hint">Price (XLM per Laam)</div>
-          </div>
-
-          <div class="field">
-            <div class="inputWrap">
-              <input id="sellAmt" type="number" step="0.0000001" placeholder="Amount" />
-              <div class="unit">Laam</div>
-            </div>
-            <div class="rowBtns">
-              <button data-fill="25" data-side="sell">25%</button>
-              <button data-fill="50" data-side="sell">50%</button>
-              <button data-fill="75" data-side="sell">75%</button>
-              <button data-fill="100" data-side="sell">100%</button>
-            </div>
-          </div>
-
-          <div class="totalBox">
-            <div class="inputWrap">
-              <input id="sellTotal" type="number" step="0.0000001" placeholder="0.0000000" disabled />
-              <div class="unit">XLM</div>
-            </div>
-            <div class="hint">Total XLM you'll receive</div>
-          </div>
-
-          <button class="cta sell" id="btnSell">Sell Laam</button>
+          <div class="hint">Price (XLM per Laam)</div>
         </div>
+
+        <div class="field">
+          <div class="inputWrap">
+            <input id="modalAmount" type="number" step="0.0000001" placeholder="Amount" />
+            <div class="unit">Laam</div>
+          </div>
+          <div class="rowBtns">
+            <button data-fill="25">25%</button>
+            <button data-fill="50">50%</button>
+            <button data-fill="75">75%</button>
+            <button data-fill="100">100%</button>
+          </div>
+        </div>
+
+        <div class="totalBox">
+          <div class="inputWrap">
+            <input id="modalTotal" type="number" step="0.0000001" placeholder="0.0000000" disabled />
+            <div class="unit">XLM</div>
+          </div>
+          <div class="hint" id="totalHint">Total XLM you'll pay</div>
+        </div>
+
+        <button class="cta" id="modalConfirmBtn">Buy Laam</button>
       </div>
     </div>
   </div>
@@ -372,6 +571,7 @@ let account = null;
 let balTimer = null;
 let asks = [];
 let bids = [];
+let currentTradeType = 'buy'; // 'buy' or 'sell'
 
 // === UI ELEMENTS ===
 const authSection = document.getElementById('authSection');
@@ -410,6 +610,7 @@ async function login(secret) {
         document.getElementById('pubKey').textContent = keypair.publicKey();
         showView('loggedIn');
         console.log('Account loaded successfully.');
+        await loadOrderbook();
         await refreshBalances();
         if (balTimer) clearInterval(balTimer);
         balTimer = setInterval(refreshBalances, 15000);
@@ -439,8 +640,6 @@ async function refreshBalances() {
         }
         document.getElementById('xlmBal').textContent = xlm.toFixed(2);
         document.getElementById('laamBal').textContent = laam.toFixed(2);
-        document.getElementById('availXLM').textContent = xlm.toFixed(2) + ' XLM';
-        document.getElementById('availLAAM').textContent = laam.toFixed(2) + ' Laam';
 
         // Fetch XLM to USD rate
         const xlmToUsdRate = await fetchXlmToUsdRate();
@@ -449,7 +648,8 @@ async function refreshBalances() {
             xlmUsdEl.textContent = (xlm * xlmToUsdRate).toFixed(2);
 
             // Calculate Laam USD value based on current price (0.06 USD default)
-            const laamPriceUSD = 0.06; // Default Laam price in USD
+            const laamPriceInXLM = asks.length > 0 ? parseFloat(asks[0].price) : 0;
+            const laamPriceUSD = laamPriceInXLM * xlmToUsdRate;
             laamPriceEl.textContent = laamPriceUSD.toFixed(4);
             laamUsdEl.textContent = (laam * laamPriceUSD).toFixed(2);
         } else {
@@ -473,24 +673,138 @@ async function fetchXlmToUsdRate() {
     }
 }
 
-// === TRADING FUNCTIONS ===
-function calculateTotal(side) {
-    const priceInput = document.getElementById(side + 'Price');
-    const amtInput = document.getElementById(side + 'Amt');
-    const totalInput = document.getElementById(side + 'Total');
-    
-    const price = parseFloat(priceInput.value) || 0;
-    const amount = parseFloat(amtInput.value) || 0;
-    const total = price * amount;
-    
-    totalInput.value = total.toFixed(7);
+async function loadOrderbook() {
+    try {
+        const orderbook = await server.orderbook(LAAM, XLM).call();
+        asks = orderbook.asks;
+        bids = orderbook.bids;
+        
+        // Update asks table
+        const asksBody = document.getElementById('asksBody');
+        if (asksBody) {
+            asksBody.innerHTML = asks.slice(0, 5).map(ask => {
+                const amount = parseFloat(ask.amount);
+                const price = parseFloat(ask.price);
+                const total = amount * price;
+                return `<tr class="ask-row">
+                    <td>${amount.toFixed(2)}</td>
+                    <td>${price.toFixed(7)}</td>
+                    <td>${total.toFixed(4)}</td>
+                </tr>`;
+            }).join('');
+        }
+        
+        // Update bids table
+        const bidsBody = document.getElementById('bidsBody');
+        if (bidsBody) {
+            bidsBody.innerHTML = bids.slice(0, 5).map(bid => {
+                const amount = parseFloat(bid.amount);
+                const price = parseFloat(bid.price);
+                const total = amount * price;
+                return `<tr class="bid-row">
+                    <td>${amount.toFixed(2)}</td>
+                    <td>${price.toFixed(7)}</td>
+                    <td>${total.toFixed(4)}</td>
+                </tr>`;
+            }).join('');
+        }
+        
+        // Update spread
+        const spreadEl = document.getElementById('spreadValue');
+        if (spreadEl && asks.length > 0 && bids.length > 0) {
+            const spread = parseFloat(asks[0].price) - parseFloat(bids[0].price);
+            spreadEl.textContent = spread.toFixed(7);
+        }
+        
+        // Update overview price
+        const overviewPriceEl = document.getElementById('overviewLaamPriceXLM');
+        if (overviewPriceEl && asks.length > 0) {
+            overviewPriceEl.textContent = parseFloat(asks[0].price).toFixed(5);
+        }
+        
+    } catch (error) {
+        console.error('Error loading orderbook:', error);
+        const asksBody = document.getElementById('asksBody');
+        const bidsBody = document.getElementById('bidsBody');
+        if (asksBody) asksBody.innerHTML = `<tr><td colspan="3" class="muted">Error loading offers</td></tr>`;
+        if (bidsBody) bidsBody.innerHTML = `<tr><td colspan="3" class="muted">Error loading offers</td></tr>`;
+    }
 }
 
-function fillPercentage(percentage, side) {
+// === TRADING FUNCTIONS ===
+function openTradeModal(type) {
+    currentTradeType = type;
+    const modal = document.getElementById('tradeModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const panelTitle = document.getElementById('panelTitle');
+    const availBalance = document.getElementById('availBalance');
+    const totalHint = document.getElementById('totalHint');
+    const confirmBtn = document.getElementById('modalConfirmBtn');
+    
+    if (type === 'buy') {
+        modalTitle.textContent = 'Buy Laam';
+        panelTitle.textContent = 'Buy Laam';
+        totalHint.textContent = 'Total XLM you\'ll pay';
+        confirmBtn.textContent = 'Buy Laam';
+        confirmBtn.className = 'cta buy';
+        document.getElementById('buyPanel').style.display = 'block';
+        document.getElementById('sellPanel').style.display = 'none';
+        
+        // Set available XLM balance
+        if (account) {
+            for (const b of account.balances) {
+                if (b.asset_type === 'native') {
+                    availBalance.textContent = parseFloat(b.balance).toFixed(2) + ' XLM';
+                    break;
+                }
+            }
+        }
+    } else {
+        modalTitle.textContent = 'Sell Laam';
+        panelTitle.textContent = 'Sell Laam';
+        totalHint.textContent = 'Total XLM you\'ll receive';
+        confirmBtn.textContent = 'Sell Laam';
+        confirmBtn.className = 'cta sell';
+        document.getElementById('buyPanel').style.display = 'none';
+        document.getElementById('sellPanel').style.display = 'block';
+        
+        // Set available Laam balance
+        if (account) {
+            for (const b of account.balances) {
+                if (b.asset_code === 'Laam' && b.asset_issuer === ISSUER) {
+                    availBalance.textContent = parseFloat(b.balance).toFixed(2) + ' Laam';
+                    break;
+                }
+            }
+        }
+    }
+    
+    // Clear form
+    document.getElementById('modalPrice').value = '';
+    document.getElementById('modalAmount').value = '';
+    document.getElementById('modalTotal').value = '';
+    
+    modal.classList.add('show');
+}
+
+function closeTradeModal() {
+    const modal = document.getElementById('tradeModal');
+    modal.classList.remove('show');
+}
+
+function calculateModalTotal() {
+    const price = parseFloat(document.getElementById('modalPrice').value) || 0;
+    const amount = parseFloat(document.getElementById('modalAmount').value) || 0;
+    const total = price * amount;
+    
+    document.getElementById('modalTotal').value = total.toFixed(7);
+}
+
+function fillModalPercentage(percentage) {
     if (!account) return;
     
     let availableBalance = 0;
-    if (side === 'buy') {
+    if (currentTradeType === 'buy') {
         // For buying, use XLM balance
         for (const b of account.balances) {
             if (b.asset_type === 'native') {
@@ -499,11 +813,11 @@ function fillPercentage(percentage, side) {
             }
         }
         
-        const price = parseFloat(document.getElementById('buyPrice').value) || 0;
+        const price = parseFloat(document.getElementById('modalPrice').value) || 0;
         if (price > 0) {
             const maxAmount = (availableBalance * percentage / 100) / price;
-            document.getElementById('buyAmt').value = maxAmount.toFixed(7);
-            calculateTotal('buy');
+            document.getElementById('modalAmount').value = maxAmount.toFixed(7);
+            calculateModalTotal();
         }
     } else {
         // For selling, use Laam balance
@@ -515,19 +829,19 @@ function fillPercentage(percentage, side) {
         }
         
         const amount = availableBalance * percentage / 100;
-        document.getElementById('sellAmt').value = amount.toFixed(7);
-        calculateTotal('sell');
+        document.getElementById('modalAmount').value = amount.toFixed(7);
+        calculateModalTotal();
     }
 }
 
-async function executeTrade(side) {
+async function executeModalTrade() {
     if (!keypair || !account) {
         alert('Please login first');
         return;
     }
     
-    const price = parseFloat(document.getElementById(side + 'Price').value);
-    const amount = parseFloat(document.getElementById(side + 'Amt').value);
+    const price = parseFloat(document.getElementById('modalPrice').value);
+    const amount = parseFloat(document.getElementById('modalAmount').value);
     
     if (!price || !amount) {
         alert('Please enter valid price and amount');
@@ -540,7 +854,7 @@ async function executeTrade(side) {
             networkPassphrase: StellarSdk.Networks.PUBLIC
         });
         
-        if (side === 'buy') {
+        if (currentTradeType === 'buy') {
             // Create buy offer (buying Laam with XLM)
             transaction.addOperation(StellarSdk.Operation.manageBuyOffer({
                 selling: XLM,
@@ -562,20 +876,34 @@ async function executeTrade(side) {
         builtTransaction.sign(keypair);
         
         const result = await server.submitTransaction(builtTransaction);
-        alert(`${side.charAt(0).toUpperCase() + side.slice(1)} order submitted successfully!`);
+        alert(`${currentTradeType.charAt(0).toUpperCase() + currentTradeType.slice(1)} order submitted successfully!`);
         
-        // Clear form
-        document.getElementById(side + 'Price').value = '';
-        document.getElementById(side + 'Amt').value = '';
-        document.getElementById(side + 'Total').value = '';
-        
-        // Refresh balances
+        // Close modal and refresh
+        closeTradeModal();
         await refreshBalances();
+        await loadOrderbook();
         
     } catch (error) {
         console.error('Trade error:', error);
         alert('Trade failed: ' + error.message);
     }
+}
+
+// === TAB SWITCHING ===
+function switchTab(tabName) {
+    // Remove active class from all tabs
+    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+    
+    // Add active class to clicked tab
+    document.getElementById(tabName + 'Tab').classList.add('active');
+    
+    // Hide all content
+    document.getElementById('orderbookContent').style.display = 'none';
+    document.getElementById('overviewContent').style.display = 'none';
+    document.getElementById('lastTradesContent').style.display = 'none';
+    
+    // Show selected content
+    document.getElementById(tabName + 'Content').style.display = 'block';
 }
 
 // === EVENT LISTENERS ===
@@ -729,26 +1057,45 @@ document.getElementById('btnSend').addEventListener('click', async () => {
 });
 
 // --- Trading Events ---
-document.getElementById('buyPrice').addEventListener('input', () => calculateTotal('buy'));
-document.getElementById('buyAmt').addEventListener('input', () => calculateTotal('buy'));
-document.getElementById('sellPrice').addEventListener('input', () => calculateTotal('sell'));
-document.getElementById('sellAmt').addEventListener('input', () => calculateTotal('sell'));
+document.getElementById('btnBuy').addEventListener('click', () => openTradeModal('buy'));
+document.getElementById('btnSell').addEventListener('click', () => openTradeModal('sell'));
 
-document.getElementById('btnBuy').addEventListener('click', () => executeTrade('buy'));
-document.getElementById('btnSell').addEventListener('click', () => executeTrade('sell'));
+// Modal events
+document.getElementById('modalPrice').addEventListener('input', calculateModalTotal);
+document.getElementById('modalAmount').addEventListener('input', calculateModalTotal);
+document.getElementById('modalConfirmBtn').addEventListener('click', executeModalTrade);
 
-// Percentage buttons
-document.querySelectorAll('[data-fill]').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const percentage = parseInt(btn.dataset.fill);
-        const side = btn.dataset.side;
-        fillPercentage(percentage, side);
+    // Percentage buttons
+    document.querySelectorAll(".rowBtns button").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const percentage = parseInt(btn.dataset.fill);
+            fillModalPercentage(percentage);
+        });
     });
+
+// Tab switching
+document.getElementById('overviewTab').addEventListener('click', () => switchTab('overview'));
+document.getElementById('orderbookTab').addEventListener('click', () => switchTab('orderbook'));
+document.getElementById('lastTradesTab').addEventListener('click', () => switchTab('lastTrades'));
+
+// Asset swapping
+document.getElementById('swapAssets').addEventListener('click', () => {
+    alert('Asset swapping functionality would be implemented here');
+});
+
+// Close modal when clicking outside
+document.getElementById('tradeModal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) {
+        closeTradeModal();
+    }
 });
 
 // === INITIALIZATION ===
 document.addEventListener('DOMContentLoaded', () => {
     showView(walletExists() ? 'unlock' : 'initial');
+    if (!walletExists()) {
+        loadOrderbook(); // Load orderbook even for non-logged in users
+    }
 });
 </script>
 </body>
