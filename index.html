@@ -1546,10 +1546,7 @@ row.addEventListener('click', () => {
         if (mode === 'buy') {
           
         // Qiimaha ugu jaban ee suuqa (ka soo qaad Orderbook-ga)
-const marketPrice = '0.135'; 
-const amountToBuy = '5';
-
-const operation = StellarSdk.Operation.manageBuyOffer({
+operation = StellarSdk.Operation.manageBuyOffer({
   selling: StellarSdk.Asset.native(),
   buying: LAAM_ASSET,
   buyAmount: amountToBuy,
