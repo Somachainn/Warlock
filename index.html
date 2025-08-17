@@ -1554,14 +1554,15 @@ row.addEventListener('click', () => {
           });
         } else {
           // Create sell offer: selling Laam, buying XLM
-          operation = StellarSdk.Operation.manageSellOffer({
-            selling: LAAM_ASSET,
-            buying: StellarSdk.Asset.native(),
-            amount: amount.toString(),
-            price: (1/price).toString(), // Invert price for sell offer
-            offerId: '0' // 0 means create new offer
-          });
-        }
+operation = StellarSdk.Operation.manageSellOffer({
+  selling: LAAM_ASSET,
+  buying: StellarSdk.Asset.native(),
+  amount: amount.toString(),
+  price: price.toString(), // ✅ isticmaal price sida uu yahay
+  offerId: '0'
+});
+
+      }
         
         const transaction = new StellarSdk.TransactionBuilder(account, {
           fee: StellarSdk.BASE_FEE,
