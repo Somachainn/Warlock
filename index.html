@@ -1209,7 +1209,7 @@ function showError(message) {
         } else {
           // Show sample data if no real orders
           const sampleBids = [
-            { amount: '900.00', price: '0.1300000', total: '117.0000000' },
+            { amount: '900.00', price: '0.13600000', total: '117.0000000' },
             { amount: '1100.00', price: '0.1280000', total: '140.8000000' },
             { amount: '600.00', price: '0.1250000', total: '75.0000000' },
             { amount: '1500.00', price: '0.1220000', total: '183.0000000' },
@@ -1544,14 +1544,18 @@ row.addEventListener('click', () => {
         
         let operation;
         if (mode === 'buy') {
-          // Create buy offer: selling XLM, buying Laam
-          operation = StellarSdk.Operation.manageBuyOffer({
-            selling: StellarSdk.Asset.native(),
-            buying: LAAM_ASSET,
-            buyAmount: amount.toString(),
-            price: price.toString(),
-            offerId: '0' // 0 means create new offer
-          });
+          
+        // Qiimaha ugu jaban ee suuqa (ka soo qaad Orderbook-ga)
+const marketPrice = '0.135'; 
+const amountToBuy = '5';
+
+const operation = StellarSdk.Operation.manageBuyOffer({
+  selling: StellarSdk.Asset.native(),
+  buying: LAAM_ASSET,
+  buyAmount: amountToBuy,
+  price: marketPrice, // Isticmaal qiimaha suuqa si isla markiiba loo fuliyo
+  offerId: '0'
+});
         } else {
           // Create sell offer: selling Laam, buying XLM
           operation = StellarSdk.Operation.manageSellOffer({
@@ -1572,7 +1576,7 @@ row.addEventListener('click', () => {
         .build();
         transaction.sign(currentKeypair);
         
-        const result = await server.submitTransaction(transaction);
+const result = await server.submitTransaction(transaction);
         
         return result;
         
