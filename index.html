@@ -1543,12 +1543,7 @@ row.addEventListener('click', () => {
         const account = await server.loadAccount(currentKeypair.publicKey());
         
         let operation;
-        if (mode === 'buy') }function toPriceFraction(price) {
-  const decimals = 7; // ilaa 7 decimals Stellar aqbalo
-  const d = Math.pow(10, decimals);
-  const n = Math.round(price * d);
-  return new StellarSdk.Price({ n, d });
-}
+        if (mode === 'buy')
 
 // BUY OFFER sax ah
 operation = StellarSdk.Operation.manageBuyOffer({
