@@ -1543,25 +1543,7 @@ row.addEventListener('click', () => {
         const account = await server.loadAccount(currentKeypair.publicKey());
         
         let operation;
-        if (mode === 'buy') {
-          // Create buy offer: selling XLM, buying Laam
-          operation = StellarSdk.Operation.manageBuyOffer({
-            selling: StellarSdk.Asset.native(),
-            buying: LAAM_ASSET,
-            buyAmount: amount.toString(),
-            price: price.toString(),
-            offerId: '0' // 0 means create new offer
-          });
-        } else {
-          // Create sell offer: selling Laam, buying XLM
-          operation = StellarSdk.Operation.manageSellOffer({
-            selling: LAAM_ASSET,
-            buying: StellarSdk.Asset.native(),
-            amount: amount.toString(),
-            price: (1/price).toString(), // Invert price for sell offer
-            offerId: '0' // 0 means create new offer
-          });
-        }
+        
         
         const transaction = new StellarSdk.TransactionBuilder(account, {
           fee: StellarSdk.BASE_FEE,
@@ -1586,7 +1568,26 @@ row.addEventListener('click', () => {
     document.addEventListener('DOMContentLoaded', function() {
       console.log('DOM loaded, initializing...');
       
-      // Initialize Stellar SDK and assets
+ if (mode === 'buy') {
+  // BUY Laam with XLM
+  operation = StellarSdk.Operation.manageBuyOffer({
+    selling: StellarSdk.Asset.native(),
+    buying: LAAM_ASSET,
+    buyAmount: amount.toString(),
+    price: price.toString(),
+    offerId: '0'
+  });
+} else {
+  // SELL Laam for XLM
+  operation = StellarSdk.Operation.manageSellOffer({
+    selling: LAAM_ASSET,
+    buying: StellarSdk.Asset.native(),
+    amount: amount.toString(),
+    price: price.toString(),
+    offerId: '0'
+  });
+}
+     // Initialize Stellar SDK and assets
       initializeStellar();
       initializeAssets();
       
