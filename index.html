@@ -357,7 +357,8 @@
   .trade-header .icon:hover{ color:var(--brand); }
   
   /* My Orders Modal */
-  .my-orders-modal{ display:none; position:fixed; inset:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; }
+  .my-orders-modal{ display:none; position:fixed; inset:0; width:100%; height:100%; background:rgba(0,0,0,0.5);
+    z-index:1000; align-items:center; justify-content:center; }
   .my-orders-modal.show{ display:flex; }
   .my-orders-modal-content{
     background:rgba(255, 255, 255, 0.95);
@@ -509,7 +510,6 @@
   .trades-content{ padding:10px 20px 20px; }
   .trades-table{ width:100%; border-collapse:collapse; }
   .trades-table th,.trades-table td{ text-align:right; padding:8px 4px; font-size:.9rem; }
-  .trades-table th{ color:var(--muted); font-weight:600; border-bottom:2px solid var(--line); }
   .trades-table th:first-child,.trades-table td:first-child{ text-align:left; }
   .trade-buy{ color:var(--ok); }
   .trade-sell{ color:var(--err); }
@@ -736,7 +736,7 @@
           </div>
           <div class="pill">
             <div>Laam: <span id="laamBal">0.00</span></div>
-            <div class="muted" style="font-size:0.8rem;">$<span id="laamUsd">0.00</span> ($<span id="laamPrice">0.06</span>/Laam)</div>
+            <div class="muted" style="font-size:0.8rem;">$<span id="laamPrice">0.06</span>/Laam)</div>
           </div>
         </div>
         <label style="margin-top:10px;">Your Public Key</label>
