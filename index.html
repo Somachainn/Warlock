@@ -1548,10 +1548,11 @@ row.addEventListener('click', () => {
 operation = StellarSdk.Operation.manageBuyOffer({
   selling: StellarSdk.Asset.native(),
   buying: LAAM_ASSET,
-  buyAmount: amount.toString(),  // inta Laam la iibsanayo
-  price: price.toString(),       // qiimaha XLM per Laam, sida uu user-ku geliyo
+  buyAmount: amount.toString(),     // inta Laam aad rabto
+  price: (1 / price).toString(),    // sax: rogo qiimaha
   offerId: '0'
 });
+
        } else {
           // Create sell offer: selling Laam, buying XLM
 operation = StellarSdk.Operation.manageSellOffer({
