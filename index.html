@@ -1538,13 +1538,6 @@ row.addEventListener('click', () => {
     document.addEventListener('DOMContentLoaded', function() {
       console.log('DOM loaded, initializing...');
       
-      // I// Helper: Convert decimal to StellarSdk.Price fraction
-function toPriceFraction(price) {
-  const decimals = 7; // Stellar supports up to 7 decimals
-  const d = Math.pow(10, decimals);
-  const n = Math.round(price * d);
-  return new StellarSdk.Price({ n, d });
-}
 
 // Execute actual trade on Stellar DEX
 async function executeTrade(mode, price, amount) {
