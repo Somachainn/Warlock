@@ -1543,15 +1543,22 @@ row.addEventListener('click', () => {
         const account = await server.loadAccount(currentKeypair.publicKey());
         
         let operation;
-        if (mode === 'buy') {
-          // Create buy offer: selling XLM, buying Laam
+        if (mode === 'buy') function toPriceFraction(price) {
+  const decimals = 7; // ilaa 7 decimals Stellar aqbalo
+  const d = Math.pow(10, decimals);
+  const n = Math.round(price * d);
+  return new StellarSdk.Price({ n, d });
+}
+
+// BUY OFFER sax ah
 operation = StellarSdk.Operation.manageBuyOffer({
   selling: StellarSdk.Asset.native(),
   buying: LAAM_ASSET,
-  buyAmount: amount.toString(), // inta Laam la rabto
-  price: new StellarSdk.Price({ n: 135, d: 1000 }), // 0.135 XLM/Laam
+  buyAmount: amount.toString(),        // tusaale 5 Laam
+  price: toPriceFraction(price),       // 0.1348000 XLM/Laam oo fraction sax ah
   offerId: '0'
 });
+
      } else {
           // Create sell offer: selling Laam, buying XLM
 operation = StellarSdk.Operation.manageSellOffer({
