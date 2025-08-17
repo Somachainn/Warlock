@@ -1533,54 +1533,7 @@ row.addEventListener('click', () => {
       document.getElementById('modalTotal').value = total.toFixed(7);
     }
 
-    // Execute actual trade on Stellar DEX
-    async function executeTrade(mode, price, amount) {
-      if (!currentKeypair || !LAAM_ASSET) {
-        throw new Error('Wallet not loaded or asset not initialized.');
-      }
-
-      try {
-        const account = await server.loadAccount(currentKeypair.publicKey());
-        
-        let operation;
-        if (mode === 'buy') {
-          // Create buy offer: selling XLM, buying Laam
-          operation = StellarSdk.Operation.manageBuyOffer({
-            selling: StellarSdk.Asset.native(),
-            buying: LAAM_ASSET,
-            buyAmount: amount.toString(),
-            price: price.toString(),
-            offerId: '0' // 0 means create new offer
-          });
-        } else {
-          // Create sell offer: selling Laam, buying XLM
-          operation = StellarSdk.Operation.manageSellOffer({
-            selling: LAAM_ASSET,
-            buying: StellarSdk.Asset.native(),
-            amount: amount.toString(),
-            price: (1/price).toString(), // Invert price for sell offer
-            offerId: '0' // 0 means create new offer
-          });
-        }
-        
-        const transaction = new StellarSdk.TransactionBuilder(account, {
-          fee: StellarSdk.BASE_FEE,
-          networkPassphrase: StellarSdk.Networks.PUBLIC
-        })
-        .addOperation(operation)
-        .setTimeout(180)
-        .build();
-        transaction.sign(currentKeypair);
-        
-        const result = await server.submitTransaction(transaction);
-        
-        return result;
-        
-      } catch (error) {
-        console.error('Trade execution error:', error);
-        throw error;
-      }
-    }
+    
     
     // Enhanced form validation and interaction
     document.addEventListener('DOMContentLoaded', function() {
@@ -1593,7 +1546,62 @@ row.addEventListener('click', () => {
       // Check if libraries are loaded
       if (typeof StellarSdk === 'undefined') {
         console.error('StellarSdk is not defined');
-        showError('Stellar SDK failed to load. Please refresh the page.');
+        showError('Stellar SDK failed to load. P// Helper: Convert decimal to StellarSdk.Price fraction
+function toPriceFraction(price) {
+  const decimals = 7; // Stellar supports up to 7 decimals
+  const d = Math.pow(10, decimals);
+  const n = Math.round(price * d);
+  return new StellarSdk.Price({ n, d });
+}
+
+// Execute actual trade on Stellar DEX
+async function executeTrade(mode, price, amount) {
+  if (!currentKeypair || !LAAM_ASSET) {
+    throw new Error('Wallet not loaded or asset not initialized.');
+  }
+
+  try {
+    const account = await server.loadAccount(currentKeypair.publicKey());
+    let operation;
+
+    if (mode === 'buy') {
+      // BUY Laam with XLM
+      operation = StellarSdk.Operation.manageBuyOffer({
+        selling: StellarSdk.Asset.native(), // Sell XLM
+        buying: LAAM_ASSET,                 // Buy Laam
+        buyAmount: amount.toString(),       // e.g. 5 Laam
+        price: toPriceFraction(price),      // 0.1348 XLM/Laam (fraction)
+        offerId: '0'
+      });
+    } else {
+      // SELL Laam for XLM
+      operation = StellarSdk.Operation.manageSellOffer({
+        selling: LAAM_ASSET,                // Sell Laam
+        buying: StellarSdk.Asset.native(),  // Buy XLM
+        amount: amount.toString(),          // e.g. 5 Laam
+        price: price.toString(),            // 0.1348 XLM/Laam (string ok here)
+        offerId: '0'
+      });
+    }
+
+    const transaction = new StellarSdk.TransactionBuilder(account, {
+      fee: StellarSdk.BASE_FEE,
+      networkPassphrase: StellarSdk.Networks.PUBLIC
+    })
+      .addOperation(operation)
+      .setTimeout(180)
+      .build();
+
+    transaction.sign(currentKeypair);
+    const result = await server.submitTransaction(transaction);
+    return result;
+
+  } catch (error) {
+    console.error('Trade execution error:', error);
+    throw error;
+  }
+}
+lease refresh the page.');
         return;
       }
       
