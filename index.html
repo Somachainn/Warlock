@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Laam Wallet</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stellar-sdk/10.4.0/stellar-sdk.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<style>
+:root{
+  --bg1:#eef2f3; --bg2:#8e9eab;
+  --card:#ffffff; --line:#d6e0ea; --soft:#f4f7fb;
+  --text:#0a192f; --muted:#5f7383;
+  --brand:#0052cc; --brand2:#0041a3; --ok:#28a745; --err:#dc3545;
+  --rad:16px; --maxw:980px;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color:var(--text);
+  background:linear-gradient(135deg,var(--bg1),var(--bg2));
+  min-height:100vh; padding:24px 14px; display:flex; justify-content:center;
+}
+.app{width:100%; max-width:var(--maxw);}
+h1{margin:0 0 14px; text-align:center; color:var(--brand); font-size:1.9rem; font-weight:800}
+.card{background:var(--card); border:1px solid var(--line); border-radius:var(--rad); box-shadow:0 10px 30px rgba(0,0,0,.06); padding:18px; margin:12px 0;}
+.row{margin:10px 0}
+label{display:block; font-weight:700; color:var(--brand); margin-bottom:6px}
+input,select,button{
+  width:100%; padding:12px 14px; border:1px solid var(--line); border-radius:12px; background:#fbfdff; font-size:1rem;
+}
+input:focus,select:focus{outline:none; border-color:var(--brand)}
+button{background:var(--brand); color:#fff; font-weight:800; letter-spacing:.02em; border:none; cursor:pointer; box-shadow:0 6px 16px rgba(0,82,204,.25); text-transform:uppercase}
+button:hover{background:var(--brand2)}
+.btn-row{display:grid; grid-template-columns:repeat(4,1fr); gap:10px}
+@media (max-width:760px){ .btn-row{grid-template-columns:repeat(2,1fr)} }
+.btn-secondary{background:#6c757d} .btn-secondary:hover{background:#5a6268}
+.btn-danger{background:#dc3545} .btn-danger:hover{background:#c82333}
+.pill{
+  background:var(--soft); border:1px solid var(--line); border-radius:14px; padding:10px 14px; display:flex; align-items:center; gap:10px; font-weight:700
+}
+.portfolio{display:grid; grid-template-columns:1fr; gap:12px; align-items:stretch}
+.value-xl{font-size:1.6rem; font-weight:900}
+.sub{color:var(--muted); font-size:.9rem}
+.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background:#eef3f8; border:1px solid var(--line); padding:10px; border-radius:12px; word-break:break-word}
+.table{width:100%; border-collapse:collapse}
+.table th,.table td{padding:10px; border-bottom:1px solid var(--line); text-align:right}
+.table th:first-child,.table td:first-child{text-align:left}
+.badge{font-size:.78rem; padding:3px 8px; border-radius:999px; background:#e7f1ff; color:var(--brand); border:1px solid var(--line)}
+.center{text-align:center}
+.modal{position:fixed; inset:0; display:none; place-items:center; background:rgba(0,0,0,.45); z-index:1000}
+.modal.show{display:grid}
+.modal-card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:18px; width:min(520px,94vw); max-height:90vh; overflow:auto}
+.modal-title{margin:0 0 8px; color:var(--brand)}
+.close-x{background:none; border:none; font-size:1.6rem; color:var(--muted); cursor:pointer; float:right}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <h1>Laam Wallet</h1>
+
+  <!-- AUTH -->
+  <div id="authCard" class="card">
+    <div id="firstView">
+      <div class="row"><label>Secret Key (S…)</label><input id="sk" type="password" placeholder="SXXXXXXXXXXXXXXXXXXXXXXXX" /></div>
+      <div class="row"><label>Create Password to Save</label><input id="pwd" type="password" placeholder="Min 8 chars" /></div>
+      <div class="row"><button id="importBtn">Import and Save</button></div>
+      <div class="row sub">Ama <a href="#" id="generateKey">Generate new Stellar account</a></div>
+      <div id="newKeys" class="row" style="display:none">
+        <div class="row"><span class="badge">NEW SECRET</span><div id="newSecret" class="mono"></div></div>
+        <div class="row"><span class="badge">NEW PUBLIC</span><div id="newPublic" class="mono"></div></div>
+      </div>
+    </div>
+
+    <div id="unlockView" style="display:none">
+      <div class="row"><label>Password</label><input id="unlockPwd" type="password" placeholder="••••••••" /></div>
+      <div class="row"><button id="unlockBtn">Unlock</button></div>
+      <div class="row sub"><a href="#" id="forgetWallet">Forget saved wallet</a></div>
+    </div>
+  </div>
+
+  <!-- LOGGED IN -->
+  <div id="walletView" style="display:none">
+
+    <!-- Portfolio -->
+    <div class="card">
+      <div class="portfolio">
+        <div class="pill">
+          <div style="flex:1">
+            <div class="sub">Portfolio Value</div>
+            <div class="value-xl">$<span id="pfUsd">0.00</span></div>
+            <div class="sub"><span id="pfBreak">XLM $0.00 + Laam $0.00</span></div>
+          </div>
+          <span class="badge">LIVE</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="card">
+      <div class="btn-row">
+        <button id="btnSend">Send</button>
+        <button id="btnReceive" class="btn-secondary">Receive</button>
+        <button id="btnTrust">Add Laam Trustline</button>
+        <button id="btnLock" class="btn-danger">Lock Wallet</button>
+      </div>
+    </div>
+
+    <!-- My Assets -->
+    <div class="card">
+      <table class="table">
+        <thead><tr><th>Asset</th><th>Balance</th><th>Price</th><th>Value (USD)</th></tr></thead>
+        <tbody>
+          <tr><td>XLM</td><td id="xlmBal">0.00</td><td>$<span id="xlmUsdPrice">0.00</span></td><td>$<span id="xlmUsdVal">0.00</span></td></tr>
+          <tr><td>Laam</td><td id="laamBal">0.00</td><td><span id="laamPriceXLM">0.0000000</span> XLM ($<span id="laamUsdPrice">0.00</span>)</td><td>$<span id="laamUsdVal">0.00</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SEND MODAL -->
+  <div id="sendModal" class="modal">
+    <div class="modal-card">
+      <button class="close-x" id="sendClose">&times;</button>
+      <h3 class="modal-title">Send Asset</h3>
+      <div class="row"><label>Asset</label>
+        <select id="sendAsset"><option>XLM</option><option>Laam</option></select>
+      </div>
+      <div class="row"><label>Amount</label><input id="sendAmt" type="number" step="0.0000001" /></div>
+      <div class="row"><label>Destination (G…)</label><input id="sendDst" type="text" /></div>
+      <div class="row" id="memoRow" style="display:none"><label>Memo (optional, XLM only)</label><input id="sendMemo" type="text" /></div>
+      <div class="row"><button id="sendNow">Send Now</button></div>
+    </div>
+  </div>
+
+  <!-- RECEIVE MODAL -->
+  <div id="recvModal" class="modal">
+    <div class="modal-card">
+      <button class="close-x" id="recvClose">&times;</button>
+      <h3 class="modal-title">Receive</h3>
+      <div class="row sub">Share this public key</div>
+      <div class="row"><div id="recvPub" class="mono"></div></div>
+      <div class="row"><button id="copyRecv">Copy Address</button></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const server = new StellarSdk.Server('https://horizon.stellar.org');
+const ISSUER = 'GAL4ECDAXNBMJYFCWIJ32HKVIRLCNEXY664CAZYI3EINQWPLXTMEPR64';
+const LAAM = new StellarSdk.Asset('Laam', ISSUER);
+const XLM = StellarSdk.Asset.native();
+const STORE = 'laam_wallet_enc_v1';
+
+let keypair=null, account=null;
+let bestAsk=null, bestBid=null;
+
+function fmt(n,d=2){return (Number(n)||0).toFixed(d)}
+function encrypt(secret,pwd){return CryptoJS.AES.encrypt(secret,pwd).toString()}
+function decrypt(enc,pwd){const b=CryptoJS.AES.decrypt(enc,pwd);return b.toString(CryptoJS.enc.Utf8)}
+async function xlmUsd(){try{const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=stellar&vs_currencies=usd');const j=await r.json();return j?.stellar?.usd||0}catch{return 0}}
+
+function laamPriceFromOrderbook(){const ask=bestAsk?parseFloat(bestAsk.price):0;return ask||0}
+
+async function updatePricesSection(){
+  const xlmPrice=await xlmUsd();
+  document.getElementById('xlmUsdPrice').textContent=fmt(xlmPrice,4);
+  const xlmBal=parseFloat(document.getElementById('xlmBal').textContent)||0;
+  const laamBal=parseFloat(document.getElementById('laamBal').textContent)||0;
+  const laamPriceInXLM=laamPriceFromOrderbook();
+  document.getElementById('laamPriceXLM').textContent=laamPriceInXLM?fmt(laamPriceInXLM,7):'0.0000000';
+  const laamUsd=laamPriceInXLM*xlmPrice;
+  document.getElementById('laamUsdPrice').textContent=fmt(laamUsd,4);
+  document.getElementById('xlmUsdVal').textContent=fmt(xlmBal*xlmPrice,2);
+  document.getElementById('laamUsdVal').textContent=fmt(laamBal*laamUsd,2);
+  document.getElementById('pfUsd').textContent=fmt(xlmBal*xlmPrice+laamBal*laamUsd,2);
+  document.getElementById('pfBreak').textContent=`XLM $${fmt(xlmBal*xlmPrice,2)} + Laam $${fmt(laamBal*laamUsd,2)}`;
+}
+
+document.getElementById('sendAsset').addEventListener('change',e=>{
+  document.getElementById('memoRow').style.display=e.target.value==='XLM'?'block':'none';
+});
+
+document.getElementById('sendNow').addEventListener('click',async()=>{
+  if(!keypair||!account){alert('Unlock first');return}
+  const assetSel=document.getElementById('sendAsset').value;
+  const amt=document.getElementById('sendAmt').value.trim();
+  const dst=document.getElementById('sendDst').value.trim();
+  const memo=document.getElementById('sendMemo').value.trim();
+  try{
+    let tb=new StellarSdk.TransactionBuilder(account,{fee:StellarSdk.BASE_FEE,networkPassphrase:StellarSdk.Networks.PUBLIC});
+    const asset=assetSel==='XLM'?XLM:LAAM;
+    tb.addOperation(StellarSdk.Operation.payment({destination:dst,asset,amount:String(amt)}));
+    if(assetSel==='XLM'&&memo){tb.addMemo(StellarSdk.Memo.text(memo));}
+    const tx=tb.setTimeout(30).build();tx.sign(keypair);
+    await server.submitTransaction(tx);
+    alert('Payment sent!');document.getElementById('sendAmt').value='';document.getElementById('sendDst').value='';document.getElementById('sendMemo').value='';
+  }catch(e){alert('Send failed: '+(e?.response?.data?.extras?.result_codes?.operations||e.message))}
+});
+</script>
+</body>
+</html>
