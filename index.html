@@ -923,7 +923,7 @@
       description: "Laam is a limited supply token on Stellar with a maximum of 1,335,577 tokens, issued only once to preserve value.",
       image: "https://i.ibb.co/r28SP1bN/20250802-225108.png",
       maxSupply: 1335577,
-      currentPrice: 0.06
+      laamPriceSellTop = bestAsk ? parseFloat(bestAsk.price) : 0;document.getElementById('laamPrice').textContent = laamPriceSellTop.toFixed(7);
     };
 
     // Global variables
@@ -1413,9 +1413,7 @@ row.addEventListener('click', () => {
         // Update Laam balance with USD values
         document.getElementById('laamBal').textContent = laamBalance.toFixed(2);
         document.getElementById('laamUsd').textContent = (laamBalance * LAAM_TOKEN.currentPrice).toFixed(2);
-        // Sell offers-ka ugu sarreeya (highest ask)
-const laamPriceSellTop = bestAsk ? parseFloat(bestAsk.price) : 0;
-document.getElementById('laamPrice').textContent = laamPriceSellTop.toFixed(7);
+        document.getElementById('laamPrice').textContent = laamPriceSellTop.toFixed(7);
      
   console.log('Balance display updated successfully');
         
