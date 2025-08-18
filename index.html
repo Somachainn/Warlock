@@ -1412,9 +1412,11 @@ row.addEventListener('click', () => {
         // Update Laam balance with USD values
         document.getElementById('laamBal').textContent = laamBalance.toFixed(2);
         document.getElementById('laamUsd').textContent = (laamBalance * LAAM_TOKEN.currentPrice).toFixed(2);
-        document.getElementById('laamPrice').textContent = laamPriceSellTop.toFixed(7);
-     
-  console.log('Balance display updated successfully');
+        // Sell offers-ka ugu sarreeya (highest ask)
+const laamPriceSellTop = bestAsk ? parseFloat(bestAsk.price) : 0;
+document.getElementById('laamPrice').textContent = laamPriceSellTop.toFixed(7);
+ 
+        console.log('Balance display updated successfully');
         
       } catch (error) {
         console.error('Error updating balance display:', error);
