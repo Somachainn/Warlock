@@ -1409,19 +1409,15 @@ row.addEventListener('click', () => {
         document.getElementById('xlmBal').textContent = xlmBalance.toFixed(2);
         document.getElementById('xlmUsd').textContent = (xlmBalance * xlmPriceUSD).toFixed(2);
         document.getElementById('xlmPrice').textContent = xlmPriceUSD.toFixed(3);
-
+     
+        // Update Laam balance with USD values
         document.getElementById('laamBal').textContent = laamBalance.toFixed(2);
-document.getElementById('laamUsd').textContent = (laamBalance * laamUsdPrice).toFixed(2);
-
-// Halkan ayaa la cusbooneysiiyay: Qiimaha Laam ku saley mar kasta SELL offers-ka ugu sareeya
-if (orderbook.asks && orderbook.asks.length > 0) {
-    const highestSell = parseFloat(orderbook.asks[0].price); // ugu horeeya waa ask ugu fiican (lowest ask)
-    document.getElementById('laamPrice').textContent = highestSell.toFixed(7);
-} else {
-    document.getElementById('laamPrice').textContent = "0.0000000";
-    }
-
-        console.log('Balance display updated successfully');
+        document.getElementById('laamUsd').textContent = (laamBalance * LAAM_TOKEN.currentPrice).toFixed(2);
+        // Sell offers-ka ugu sarreeya (highest ask)
+const laamPriceSellTop = bestAsk ? parseFloat(bestAsk.price) : 0;
+document.getElementById('laamPrice').textContent = laamPriceSellTop.toFixed(7);
+     
+  console.log('Balance display updated successfully');
         
       } catch (error) {
         console.error('Error updating balance display:', error);
