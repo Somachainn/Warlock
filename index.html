@@ -1537,45 +1537,40 @@ row.addEventListener('click', () => {
       document.getElementById('modalTotal').value = total.toFixed(7);
     }
 
-    // Execute actual trade on Stellar DEX
-    async function executeTrade(mode, price, amount) {
-      if (!currentKeypair || !LAAM_ASSET) {
-        throw new Error('Wallet not loaded or asset not initialized.');
-      }
+    // ===== [FULL FIXED TRADE LOGIC] =====
+async function executeTrade(mode, price, amount) {
+  const account = await server.loadAccount(currentKeypair.publicKey());
+  let operation;
 
-      try {
-        const account = await server.loadAccount(currentKeypair.publicKey());
-          let operation;
-        if (mode === 'buy') {
-          // Create buy offer: selling XLM, buying Laam
-          operation = StellarSdk.Operation.manageBuyOffer({
-            selling: StellarSdk.Asset.native(),
-            buying: LAAM_ASSET,
-            buyAmount: amount.toString(),
-            price: price.toString(),
-            offerId: '0' // 0 means create new offer
-          });
-        } else {
-          // Create sell offer: selling Laam, buying XLM
-          operation = StellarSdk.Operation.manageSellOffer({
-            selling: LAAM_ASSET,
-            buying: StellarSdk.Asset.native(),
-            amount: amount.toString(),
-            price: (1/price).toString(), // Invert price for sell offer
-            offerId: '0' // 0 means create new offer
-          });
-        }
-        
-        const transaction = new StellarSdk.TransactionBuilder(account, {
-          fee: StellarSdk.BASE_FEE,
-          networkPassphrase: StellarSdk.Networks.PUBLIC
-        })
-        .addOperation(operation)
-        .setTimeout(180)
-        .build();
-        transaction.sign(currentKeypair);
-        
-        const result = await server.submitTransaction(transaction);
+  if (mode === 'buy') {
+    operation = StellarSdk.Operation.manageBuyOffer({
+      selling: StellarSdk.Asset.native(),  // Sell XLM
+      buying: LAAM_ASSET,                  // Buy Laam
+      buyAmount: amount.toString(),        // Laam to buy
+      price: price.toString(),             // XLM per Laam (e.g., 0.10)
+      offerId: '0'
+    });
+  } else {
+    operation = StellarSdk.Operation.manageSellOffer({
+      selling: LAAM_ASSET,                 // Sell Laam
+      buying: StellarSdk.Asset.native(),    // Buy XLM
+      amount: amount.toString(),            // Laam to sell
+      price: price.toString(),              // XLM per Laam (e.g., 0.10)
+      offerId: '0'
+    });
+  }
+
+  const transaction = new StellarSdk.TransactionBuilder(account, {
+    fee: StellarSdk.BASE_FEE,
+    networkPassphrase: StellarSdk.Networks.PUBLIC
+  })
+    .addOperation(operation)
+    .setTimeout(180)
+    .build();
+
+  transaction.sign(currentKeypair);
+  return await server.submitTransaction(transaction);
+
         
         return result;
         
