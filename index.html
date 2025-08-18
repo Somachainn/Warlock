@@ -379,7 +379,7 @@
     font-size:1.5rem;
     font-weight:700;
     color:#1976d2;
-    margin:0;
+    margin:0; 
   }
   .my-orders-modal-close{
     background:none;
@@ -1421,7 +1421,6 @@ if (orderbook.asks && orderbook.asks.length > 0) {
 } else {
     document.getElementById('laamPrice').textContent = "0.0000000";
     }
-        console.log('Balance display updated successfully');
         
       } catch (error) {
         console.error('Error updating balance display:', error);
