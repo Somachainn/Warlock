@@ -379,7 +379,7 @@
     font-size:1.5rem;
     font-weight:700;
     color:#1976d2;
-    margin:0; 
+    margin:0;
   }
   .my-orders-modal-close{
     background:none;
@@ -754,6 +754,14 @@
           </div>
           <label for="sendDest" style="margin-top:8px;">Destination Public Key</label>
           <input id="sendDest" type="text" placeholder="G... destination" />
+          
+          <!-- NEW MEMO FIELD ADDED HERE -->
+          <div class="form-group">
+            <label for="sendMemo">Memo (Optional)</label>
+            <input class="form-input" id="sendMemo" type="text" placeholder="Memo text or ID" maxlength="28" />
+            <p class="note-text">Maximum 28 characters for text memos</p>
+          </div>
+          
           <button id="btnSend" style="margin-top:10px;">Send Now</button>
         </div>
       </div>
@@ -923,7 +931,7 @@
       description: "Laam is a limited supply token on Stellar with a maximum of 1,335,577 tokens, issued only once to preserve value.",
       image: "https://i.ibb.co/r28SP1bN/20250802-225108.png",
       maxSupply: 1335577,
-      currentPrice: 0.057
+      currentPrice: 0.06
     };
 
     // Global variables
@@ -966,7 +974,7 @@
     }
     
     // Utility functions
-function showError(message) {
+    function showError(message) {
       alert('Error: ' + message);
     }
     
@@ -1203,7 +1211,7 @@ function showError(message) {
                 calculateTotal();
               }
             });
-            
+              
             bidsBody.appendChild(row);
           });
         } else {
@@ -1412,15 +1420,10 @@ row.addEventListener('click', () => {
 
         // Update Laam balance
         document.getElementById('laamBal').textContent = laamBalance.toFixed(2);
-document.getElementById('laamUsd').textContent = (laamBalance * laamUsdPrice).toFixed(2);
+        document.getElementById('laamUsd').textContent = (laamBalance * LAAM_TOKEN.currentPrice).toFixed(2);
+        document.getElementById('laamPrice').textContent = LAAM_TOKEN.currentPrice.toFixed(2);
 
-// Halkan ayaa la cusbooneysiiyay: Qiimaha Laam ku saley mar kasta SELL offers-ka ugu sareeya
-if (orderbook.asks && orderbook.asks.length > 0) {
-    const highestSell = parseFloat(orderbook.asks[0].price); // ugu horeeya waa ask ugu fiican (lowest ask)
-    document.getElementById('laamPrice').textContent = highestSell.toFixed(7);
-} else {
-    document.getElementById('laamPrice').textContent = "0.0000000";
-    }
+        console.log('Balance display updated successfully');
         
       } catch (error) {
         console.error('Error updating balance display:', error);
@@ -1516,10 +1519,6 @@ if (orderbook.asks && orderbook.asks.length > 0) {
       modal.classList.remove('show');
     }
 
-    
-
-    
-
     function closeTradeModal() {
       const modal = document.getElementById('tradeModal');
       modal.classList.remove('show');
@@ -1546,8 +1545,7 @@ if (orderbook.asks && orderbook.asks.length > 0) {
 
       try {
         const account = await server.loadAccount(currentKeypair.publicKey());
-        
-        let operation;
+          let operation;
         if (mode === 'buy') {
           // Create buy offer: selling XLM, buying Laam
           operation = StellarSdk.Operation.manageBuyOffer({
@@ -1608,7 +1606,7 @@ if (orderbook.asks && orderbook.asks.length > 0) {
         return;
       }
       
-      console.log('Al libraries loaded successfully');
+      console.log('All libraries loaded successfully');
       
       // Check for saved wallet
       checkSavedWallet();
@@ -1837,19 +1835,26 @@ if (orderbook.asks && orderbook.asks.length > 0) {
         }
       });
       
-      // Send transaction functionality
+      // Send transaction functionality (UPDATED WITH MEMO SUPPORT)
       document.getElementById('btnSend').addEventListener('click', async function() {
         const asset = document.getElementById('sendAsset').value;
         const amount = document.getElementById('sendAmount').value;
         const destination = document.getElementById('sendDest').value;
+        const memoText = document.getElementById('sendMemo').value.trim();
         
         if (!amount || !destination) {
-          showError('Please fill in all fields.');
+          showError('Please fill in all required fields.');
           return;
         }
         
         if (!currentKeypair) {
           showError('Wallet not loaded.');
+          return;
+        }
+        
+        // Validate memo length (text memos max 28 chars)
+        if (memoText && memoText.length > 28) {
+          showError('Memo text cannot exceed 28 characters.');
           return;
         }
         
@@ -1874,23 +1879,33 @@ if (orderbook.asks && orderbook.asks.length > 0) {
             });
           }
           
-          const transaction = new StellarSdk.TransactionBuilder(account, {
+          // Create transaction builder with memo support
+          const transactionBuilder = new StellarSdk.TransactionBuilder(account, {
             fee: StellarSdk.BASE_FEE,
             networkPassphrase: StellarSdk.Networks.PUBLIC
-          })
-          .addOperation(operation)
-          .setTimeout(180)
-          .build();
+          });
+          
+          // Add memo if provided
+          if (memoText) {
+            transactionBuilder.addMemo(StellarSdk.Memo.text(memoText));
+          }
+          
+          // Build transaction
+          const transaction = transactionBuilder
+            .addOperation(operation)
+            .setTimeout(180)
+            .build();
           
           transaction.sign(currentKeypair);
           
           const result = await server.submitTransaction(transaction);
           
-          showSuccess('Transaction sent successfully!');
+          showSuccess('Transaction sent successfully!' + (memoText ? '\n\nMemo: ' + memoText : ''));
           
           // Clear form and hide it
           document.getElementById('sendAmount').value = '';
           document.getElementById('sendDest').value = '';
+          document.getElementById('sendMemo').value = '';
           document.getElementById('sendForm').style.display = 'none';
           
           // Update balance display
