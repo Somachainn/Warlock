@@ -1157,180 +1157,93 @@
       priceChangeElement.className = priceChange >= 0 ? 'price-change positive' : 'price-change negative';
     }
 
-    // Fetch orderbook data
-    async function fetchOrderbook() {
-      try {
-        console.log('Fetching orderbook data...');
-        
-        document.getElementById('asksBody').innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px;"><div class="loading-spinner"></div> Loading asks...</td></tr>';
-        document.getElementById('bidsBody').innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px;"><div class="loading-spinner"></div> Loading bids...</td></tr>';
-        document.getElementById('spreadValue').innerHTML = '<div class="loading-spinner"></div> Loading spread...';
-        
-        const orderbookUrl = `https://horizon.stellar.org/order_book?selling_asset_type=credit_alphanum4&selling_asset_code=${LAAM_TOKEN.code}&selling_asset_issuer=${LAAM_TOKEN.issuer}&buying_asset_type=native&limit=10`;
-        
-        const response = await fetch(orderbookUrl);
-        const data = await response.json();
-        
-        console.log('Orderbook data received:', data);
-        
-        document.getElementById('asksBody').innerHTML = '';
-        document.getElementById('bidsBody').innerHTML = '';
-        
-        const asksBody = document.getElementById('asksBody');
-        if (data.asks && data.asks.length > 0) {
-          orderbookData.asks = data.asks;
-          data.asks.slice(0, 5).forEach(ask => {
-            const row = document.createElement('tr');
-            row.className = 'ask-row';
-            const amount = parseFloat(ask.amount).toFixed(2);
-            const price = parseFloat(ask.price).toFixed(7);
-            const total = (parseFloat(ask.amount) * parseFloat(ask.price)).toFixed(7);
-            
-            row.innerHTML = `
-              <td>${amount}</td>
-              <td>${price}</td>
-              <td>${total}</td>
-            `;
-            
-            row.addEventListener('click', () => {
-              if (document.getElementById('tradeModal').classList.contains('show')) {
-                document.getElementById('modalPrice').value = price;
-                calculateTotal();
-              }
-            });
-            
-            asksBody.appendChild(row);
-          });
-        } else {
-          const sampleAsks = [
-            { amount: '1000.00', price: '0.1450000', total: '145.0000000' },
-            { amount: '750.00', price: '0.1400000', total: '105.0000000' },
-            { amount: '500.00', price: '0.1380000', total: '69.0000000' },
-            { amount: '1200.00', price: '0.1360000', total: '163.2000000' },
-            { amount: '800.00', price: '0.1350000', total: '108.0000000' }
-          ];
-          
-          sampleAsks.forEach(ask => {
-            const row = document.createElement('tr');
-            row.className = 'ask-row';
-            row.innerHTML = `
-              <td>${ask.amount}</td>
-              <td>${ask.price}</td>
-              <td>${ask.total}</td>
-            `;
-            
-            row.addEventListener('click', () => {
-              if (document.getElementById('tradeModal').classList.contains('show')) {
-                document.getElementById('modalPrice').value = ask.price;
-                calculateTotal();
-              }
-            });
-            
-            asksBody.appendChild(row);
-          });
-        }
-        
-        const bidsBody = document.getElementById('bidsBody');
-        if (data.bids && data.bids.length > 0) {
-          orderbookData.bids = data.bids;
-          data.bids.slice(0, 5).forEach(bid => {
-            const row = document.createElement('tr');
-            row.className = 'bid-row';
-            const amount = parseFloat(bid.amount).toFixed(2);
-            const price = parseFloat(bid.price).toFixed(7);
-            const total = (parseFloat(bid.amount) * parseFloat(bid.price)).toFixed(7);
-            
-            row.innerHTML = `
-              <td>${amount}</td>
-              <td>${price}</td>
-              <td>${total}</td>
-            `;
-            
-            row.addEventListener('click', () => {
-              if (document.getElementById('tradeModal').classList.contains('show')) {
-                document.getElementById('modalPrice').value = price;
-                calculateTotal();
-              }
-            });
-            
-            bidsBody.appendChild(row);
-          });
-        } else {
-          const sampleBids = [
-            { amount: '900.00', price: '0.1300000', total: '117.0000000' },
-            { amount: '1100.00', price: '0.1280000', total: '140.8000000' },
-            { amount: '600.00', price: '0.1250000', total: '75.0000000' },
-            { amount: '1500.00', price: '0.1220000', total: '183.0000000' },
-            { amount: '700.00', price: '0.1200000', total: '84.0000000' }
-          ];
-          
-          sampleBids.forEach(bid => {
-            const row = document.createElement('tr');
-            row.className = 'bid-row';
-            row.innerHTML = `
-              <td>${bid.amount}</td>
-              <td>${bid.price}</td>
-              <td>${bid.total}</td>
-            `;
-            
-            row.addEventListener('click', () => {
-              if (document.getElementById('tradeModal').classList.contains('show')) {
-                document.getElementById('modalPrice').value = bid.price;
-                calculateTotal();
-              }
-            });
-            
-            bidsBody.appendChild(row);
-          });
-        }
-        
-        let spread = 'No data';
-        if (data.asks && data.asks.length > 0 && data.bids && data.bids.length > 0) {
-          const bestAsk = parseFloat(data.asks[0].price);
-          const bestBid = parseFloat(data.bids[0].price);
-          const spreadValue = bestAsk - bestBid;
-          const spreadPercent = ((spreadValue / bestBid) * 100).toFixed(2);
-          spread = `Spread: ${spreadValue.toFixed(7)} XLM (${spreadPercent}%)`;
-        } else {
-          spread = 'Spread: 0.0150000 XLM (11.54%)';
-        }
-        
-        document.getElementById('spreadValue').textContent = spread;
-        
-        console.log('Orderbook updated successfully');
-        
-      } catch (error) {
-        console.error('Error fetching orderbook:', error);
-        
-        document.getElementById('asksBody').innerHTML = `
-          <tr class="ask-row"><td>1000.00</td><td>0.1450000</td><td>145.0000000</td></tr>
-          <tr class="ask-row"><td>750.00</td><td>0.1400000</td><td>105.0000000</td></tr>
-          <tr class="ask-row"><td>500.00</td><td>0.1380000</td><td>69.0000000</td></tr>
-          <tr class="ask-row"><td>1200.00</td><td>0.1360000</td><td>163.2000000</td></tr>
-          <tr class="ask-row"><td>800.00</td><td>0.1350000</td><td>108.0000000</td></tr>
-        `;
-        
-        document.getElementById('bidsBody').innerHTML = `
-          <tr class="bid-row"><td>900.00</td><td>0.1300000</td><td>117.0000000</td></tr>
-          <tr class="bid-row"><td>1100.00</td><td>0.1280000</td><td>140.8000000</td></tr>
-          <tr class="bid-row"><td>600.00</td><td>0.1250000</td><td>75.0000000</td></tr>
-          <tr class="bid-row"><td>1500.00</td><td>0.1220000</td><td>183.0000000</td></tr>
-          <tr class="bid-row"><td>700.00</td><td>0.1200000</td><td>84.0000000</td></tr>
-        `;
-        
-        document.getElementById('spreadValue').textContent = 'Spread: 0.0150000 XLM (11.54%)';
-        
-        document.querySelectorAll('.ask-row, .bid-row').forEach(row => {
-          row.addEventListener('click', () => {
-            const price = row.children[1].textContent;
-            if (document.getElementById('tradeModal').classList.contains('show')) {
-              document.getElementById('modalPrice').value = price;
-              calculateTotal();
-            }
-          });
+    // Fetch orderbook data (asks + bids sax ah)
+async function fetchOrderbook() {
+  try {
+    console.log('Fetching orderbook data...');
+
+    // Clear placeholders
+    document.getElementById('asksBody').innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px;"><div class="loading-spinner"></div> Loading asks...</td></tr>';
+    document.getElementById('bidsBody').innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px;"><div class="loading-spinner"></div> Loading bids...</td></tr>';
+    document.getElementById('spreadValue').innerHTML = '<div class="loading-spinner"></div> Loading spread...';
+
+    // Horizon URLs
+    const asksUrl = `https://horizon.stellar.org/order_book?selling_asset_type=credit_alphanum4&selling_asset_code=${LAAM_TOKEN.code}&selling_asset_issuer=${LAAM_TOKEN.issuer}&buying_asset_type=native&limit=10`;
+    const bidsUrl = `https://horizon.stellar.org/order_book?selling_asset_type=native&buying_asset_type=credit_alphanum4&buying_asset_code=${LAAM_TOKEN.code}&buying_asset_issuer=${LAAM_TOKEN.issuer}&limit=10`;
+
+    // Fetch asks
+    const asksResp = await fetch(asksUrl);
+    const asksData = await asksResp.json();
+
+    // Fetch bids
+    const bidsResp = await fetch(bidsUrl);
+    const bidsData = await bidsResp.json();
+
+    // Clear tbody
+    const asksBody = document.getElementById('asksBody');
+    const bidsBody = document.getElementById('bidsBody');
+    asksBody.innerHTML = '';
+    bidsBody.innerHTML = '';
+
+    // Render Asks (sellers)
+    if (asksData.asks && asksData.asks.length > 0) {
+      asksData.asks.slice(0, 5).forEach(ask => {
+        const amount = parseFloat(ask.amount).toFixed(2); // Laam
+        const price = parseFloat(ask.price).toFixed(7);   // XLM/Laam
+        const total = (parseFloat(ask.amount) * parseFloat(ask.price)).toFixed(7);
+
+        const row = document.createElement('tr');
+        row.className = 'ask-row';
+        row.innerHTML = `<td>${amount}</td><td>${price}</td><td>${total}</td>`;
+
+        row.addEventListener('click', () => {
+          if (document.getElementById('tradeModal').classList.contains('show')) {
+            document.getElementById('modalPrice').value = price;
+            calculateTotal();
+          }
         });
-      }
+        asksBody.appendChild(row);
+      });
     }
+
+    // Render Bids (buyers)
+    if (bidsData.bids && bidsData.bids.length > 0) {
+      bidsData.bids.slice(0, 5).forEach(bid => {
+        const totalXLM = parseFloat(bid.amount);               // XLM uu buyer diyaar u yahay
+        const price = parseFloat(bid.price).toFixed(7);        // XLM per Laam
+        const laamAmount = (totalXLM / parseFloat(bid.price)).toFixed(2); // inta Laam uu rabo
+
+        const row = document.createElement('tr');
+        row.className = 'bid-row';
+        row.innerHTML = `<td>${laamAmount}</td><td>${price}</td><td>${totalXLM.toFixed(7)}</td>`;
+
+        row.addEventListener('click', () => {
+          if (document.getElementById('tradeModal').classList.contains('show')) {
+            document.getElementById('modalPrice').value = price;
+            calculateTotal();
+          }
+        });
+        bidsBody.appendChild(row);
+      });
+    }
+
+    // Calculate spread (best ask vs best bid)
+    let spread = 'No data';
+    if (asksData.asks.length > 0 && bidsData.bids.length > 0) {
+      const bestAsk = parseFloat(asksData.asks[0].price);
+      const bestBid = parseFloat(bidsData.bids[0].price);
+      const spreadValue = bestAsk - bestBid;
+      const spreadPercent = ((spreadValue / bestBid) * 100).toFixed(2);
+      spread = `Spread: ${spreadValue.toFixed(7)} XLM (${spreadPercent}%)`;
+    }
+    document.getElementById('spreadValue').textContent = spread;
+
+    console.log('Orderbook updated successfully');
+  } catch (error) {
+    console.error('Error fetching orderbook:', error);
+    document.getElementById('spreadValue').textContent = 'Failed to load orderbook';
+  }
+}
 
     // Fetch trades data
     async function fetchTrades() {
