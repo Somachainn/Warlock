@@ -68,6 +68,125 @@
             color: var(--primary);
         }
         
+        .auth-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+        }
+        
+        .auth-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+        
+        .auth-card h2 {
+            margin-bottom: 30px;
+            color: var(--primary);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 16px;
+            background: var(--light);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus {
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(25, 118, 210, 0.1);
+        }
+        
+        .auth-button {
+            width: 100%;
+            padding: 15px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        .auth-button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .divider {
+            margin: 30px 0;
+            text-align: center;
+            position: relative;
+        }
+        
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--border);
+        }
+        
+        .divider-text {
+            background: var(--card-bg);
+            padding: 0 16px;
+            color: var(--gray);
+            font-size: 14px;
+        }
+        
+        .generate-button {
+            color: var(--primary);
+            text-decoration: underline;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        
+        .generate-button:hover {
+            color: var(--primary-dark);
+        }
+        
+        .note-text {
+            font-size: 12px;
+            color: var(--gray);
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
         .main-content {
             display: grid;
             grid-template-columns: 1fr 350px;
@@ -96,10 +215,14 @@
             display: flex;
             justify-content: space-between;
             margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         
         .price-item {
             text-align: center;
+            flex: 1;
+            min-width: 120px;
         }
         
         .price-value {
@@ -206,11 +329,11 @@
             color: var(--dark);
         }
         
-        .form-group {
+        .form-group-sm {
             margin-bottom: 15px;
         }
         
-        .form-group label {
+        .form-group-sm label {
             display: block;
             margin-bottom: 5px;
             font-size: 0.9rem;
@@ -373,6 +496,33 @@
             padding: 10px;
         }
         
+        .my-offers-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        .my-offers-table th {
+            text-align: left;
+            padding: 10px 5px;
+            font-size: 0.85rem;
+            color: var(--gray);
+            font-weight: normal;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .my-offers-table td {
+            padding: 10px 5px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .offer-action {
+            color: var(--primary);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
         @media (max-width: 900px) {
             .main-content {
                 grid-template-columns: 1fr;
@@ -380,6 +530,19 @@
             
             .trade-panel {
                 grid-template-columns: 1fr;
+            }
+            
+            .price-info {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .price-item {
+                min-width: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                text-align: left;
             }
         }
     </style>
@@ -391,241 +554,323 @@
                 <img src="https://i.ibb.co/r28SP1bN/20250802-225108.png" alt="Laam Logo">
                 <h1>Laam Wallet</h1>
             </div>
-            <div>
-                <span>XLM Balance: <strong>2.4355278</strong></span> | 
-                <span>Laam Balance: <strong>3,230.6557035</strong></span>
+            <div id="balanceInfo" class="hidden">
+                <span>XLM Balance: <strong id="xlmBalance">0.00</strong></span> | 
+                <span>Laam Balance: <strong id="laamBalance">0.00</strong></span>
+            </div>
+            <button id="logoutBtn" class="auth-button hidden" style="padding: 8px 15px;">Lock Wallet</button>
+        </div>
+        
+        <!-- Authentication Section -->
+        <div id="authSection" class="auth-section">
+            <div class="auth-card">
+                <h2>Access Your Wallet</h2>
+                
+                <div id="unlockView" class="hidden">
+                    <div class="form-group">
+                        <label for="walletPassword">Password</label>
+                        <input id="walletPassword" type="password" placeholder="Enter your password">
+                    </div>
+                    <button id="unlockBtn" class="auth-button">Unlock Wallet</button>
+                    
+                    <div class="divider">
+                        <span class="divider-text">or</span>
+                    </div>
+                    
+                    <button id="resetWalletLink" class="generate-button">Reset and Import New Key</button>
+                </div>
+                
+                <div id="initialView">
+                    <div class="form-group">
+                        <label for="secretKeyInput">Secret Key (S...)</label>
+                        <input id="secretKeyInput" type="password" placeholder="SXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="savePasswordInput">Create Password to Save</label>
+                        <input id="savePasswordInput" type="password" placeholder="Min 8 characters">
+                    </div>
+                    
+                    <button id="importAndSaveBtn" class="auth-button">Import wallet and Save</button>
+                    
+                    <div class="divider">
+                        <span class="divider-text">or</span>
+                    </div>
+                    
+                    <div>
+                        <button id="generateAccountBtn" class="generate-button">Create new wallet</button>
+                        <p class="note-text">Note: You need to fund your wallet with at least 4 XLM to activate it</p>
+                    </div>
+                </div>
             </div>
         </div>
         
-        <div class="main-content">
-            <div class="left-panel">
-                <div class="card">
-                    <div class="card-title">
-                        <span>Laam / XLM</span>
-                        <span class="price-change">+0.005000 (+3.85%)</span>
-                    </div>
-                    
-                    <div class="price-info">
-                        <div class="price-item">
-                            <div class="price-value">$0.0162</div>
-                            <div class="price-label">Last USD Price</div>
+        <!-- Trading Interface (Hidden Initially) -->
+        <div id="tradingSection" class="hidden">
+            <div class="main-content">
+                <div class="left-panel">
+                    <div class="card">
+                        <div class="card-title">
+                            <span>Laam / XLM</span>
+                            <span class="price-change">+0.005000 (+3.85%)</span>
                         </div>
-                        <div class="price-item">
-                            <div class="price-value">0.135000 XLM</div>
-                            <div class="price-label">Last Price</div>
+                        
+                        <div class="price-info">
+                            <div class="price-item">
+                                <div class="price-value">$0.0162</div>
+                                <div class="price-label">Last USD Price</div>
+                            </div>
+                            <div class="price-item">
+                                <div class="price-value">0.135000 XLM</div>
+                                <div class="price-label">Last Price</div>
+                            </div>
+                            <div class="price-item">
+                                <div class="price-value">0.142000 XLM</div>
+                                <div class="price-label">24h High</div>
+                            </div>
+                            <div class="price-item">
+                                <div class="price-value">0.128000 XLM</div>
+                                <div class="price-label">24h Low</div>
+                            </div>
+                            <div class="price-item">
+                                <div class="price-value">12,450 Laam</div>
+                                <div class="price-label">24h Volume</div>
+                            </div>
                         </div>
-                        <div class="price-item">
-                            <div class="price-value">0.142000 XLM</div>
-                            <div class="price-label">24h High</div>
+                        
+                        <div class="trading-pairs">
+                            <div class="trading-pair active">Laam/XLM</div>
+                            <div class="trading-pair">XLM/USD</div>
+                            <div class="trading-pair">Laam/USD</div>
+                            <div class="trading-pair">XLM/BTC</div>
+                            <div class="trading-pair">View all →</div>
                         </div>
-                        <div class="price-item">
-                            <div class="price-value">0.128000 XLM</div>
-                            <div class="price-label">24h Low</div>
+                        
+                        <div class="chart-tabs">
+                            <div class="chart-tab active">Linechart</div>
+                            <div class="chart-tab">Candlestick</div>
+                            <div class="chart-tab">Bar chart</div>
                         </div>
-                        <div class="price-item">
-                            <div class="price-value">12,450 Laam</div>
-                            <div class="price-label">24h Volume</div>
+                        
+                        <div class="timeframe-tabs">
+                            <div class="timeframe-tab">1m</div>
+                            <div class="timeframe-tab">5m</div>
+                            <div class="timeframe-tab">15m</div>
+                            <div class="timeframe-tab">1h</div>
+                            <div class="timeframe-tab active">1d</div>
+                            <div class="timeframe-tab">1w</div>
+                        </div>
+                        
+                        <div class="chart-container">
+                            <canvas id="priceChart"></canvas>
+                        </div>
+                        
+                        <div class="timeframe-tabs">
+                            <div class="timeframe-tab">2m</div>
+                            <div class="timeframe-tab">0.12:59 (UTC+3)</div>
+                            <div class="timeframe-tab">Log</div>
+                            <div class="timeframe-tab">Normal</div>
                         </div>
                     </div>
                     
-                    <div class="trading-pairs">
-                        <div class="trading-pair active">Laam/XLM</div>
-                        <div class="trading-pair">XLM/USD</div>
-                        <div class="trading-pair">Laam/USD</div>
-                        <div class="trading-pair">XLM/BTC</div>
-                        <div class="trading-pair">View all →</div>
-                    </div>
-                    
-                    <div class="chart-tabs">
-                        <div class="chart-tab active">Linechart</div>
-                        <div class="chart-tab">Candlestick</div>
-                        <div class="chart-tab">Bar chart</div>
-                    </div>
-                    
-                    <div class="timeframe-tabs">
-                        <div class="timeframe-tab">1m</div>
-                        <div class="timeframe-tab">5m</div>
-                        <div class="timeframe-tab">15m</div>
-                        <div class="timeframe-tab">1h</div>
-                        <div class="timeframe-tab active">1d</div>
-                        <div class="timeframe-tab">1w</div>
-                    </div>
-                    
-                    <div class="chart-container">
-                        <canvas id="priceChart"></canvas>
-                    </div>
-                    
-                    <div class="timeframe-tabs">
-                        <div class="timeframe-tab">2m</div>
-                        <div class="timeframe-tab">0.12:59 (UTC+3)</div>
-                        <div class="timeframe-tab">Log</div>
-                        <div class="timeframe-tab">Normal</div>
+                    <div class="orderbook">
+                        <div class="card">
+                            <div class="card-title">Orderbook</div>
+                            
+                            <div class="orderbook-tabs">
+                                    <div class="orderbook-tab active">Market depth</div>
+                                <div class="orderbook-tab">Trades history</div>
+                            </div>
+                            
+                            <table class="orderbook-table">
+                                <thead>
+                                    <tr>
+                                        <th>Price (XLM)</th>
+                                        <th>Amount (Laam)</th>
+                                        <th>Total (XLM)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="asksTable">
+                                    <tr class="ask-row">
+                                        <td class="ask-price">0.136000</td>
+                                        <td>1,200.00</td>
+                                        <td>163.2000000</td>
+                                    </tr>
+                                    <tr class="ask-row">
+                                        <td class="ask-price">0.135000</td>
+                                        <td>800.00</td>
+                                        <td>108.0000000</td>
+                                    </tr>
+                                    <tr class="ask-row">
+                                        <td class="ask-price">0.134000</td>
+                                        <td>500.00</td>
+                                        <td>67.0000000</td>
+                                    </tr>
+                                </tbody>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="3" style="text-align: center; padding: 10px; font-weight: 600;">
+                                            Spread: 0.0150000 XLM (11.54%)
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <tbody id="bidsTable">
+                                    <tr class="bid-row">
+                                        <td class="bid-price">0.130000</td>
+                                        <td>900.00</td>
+                                        <td>117.0000000</td>
+                                    </tr>
+                                    <tr class="bid-row">
+                                        <td class="bid-price">0.128000</td>
+                                        <td>1,100.00</td>
+                                        <td>140.8000000</td>
+                                    </tr>
+                                    <tr class="bid-row">
+                                        <td class="bid-price">0.125000</td>
+                                        <td>600.00</td>
+                                        <td>75.0000000</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="thin-orderbook-warning">
+                            The orderbook for this pair is thin. To get a better price, create an offer without taking an existing one.
+                        </div>
+                        
+                        <div class="manage-offers">
+                            <div class="card">
+                                <div class="card-title">Manage offers</div>
+                                
+                                <div class="offer-section">
+                                    <h4>Your buy offers</h4>
+                                    <table class="my-offers-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Price</th>
+                                                <th>Amount</th>
+                                                <th>Total</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="buyOffersTable">
+                                            <tr>
+                                                <td>0.125000 XLM</td>
+                                                <td>100.00 Laam</td>
+                                                <td>12.500000 XLM</td>
+                                                <td><span class="offer-action">Cancel</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <div class="offer-section">
+                                    <h4>Your sell offers</h4>
+                                    <table class="my-offers-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Price</th>
+                                                <th>Amount</th>
+                                                <th>Total</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="sellOffersTable">
+                                            <tr>
+                                                <td>0.140000 XLM</td>
+                                                <td>50.00 Laam</td>
+                                                <td>7.000000 XLM</td>
+                                                <td><span class="offer-action">Cancel</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="orderbook">
-                    <div class="card">
-                        <div class="card-title">Orderbook</div>
-                        
-                        <div class="orderbook-tabs">
-                            <div class="orderbook-tab active">Market depth</div>
-                            <div class="orderbook-tab">Trades history</div>
-                        </div>
-                        
-                        <table class="orderbook-table">
-                            <thead>
-                                <tr>
-                                    <th>Price (XLM)</th>
-                                    <th>Amount (Laam)</th>
-                                    <th>Total (XLM)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="asksTable">
-                                <tr class="ask-row">
-                                    <td class="ask-price">0.136000</td>
-                                    <td>1,200.00</td>
-                                    <td>163.2000000</td>
-                                </tr>
-                                <tr class="ask-row">
-                                    <td class="ask-price">0.135000</td>
-                                    <td>800.00</td>
-                                    <td>108.0000000</td>
-                                </tr>
-                                <tr class="ask-row">
-                                    <td class="ask-price">0.134000</td>
-                                    <td>500.00</td>
-                                    <td>67.0000000</td>
-                                </tr>
-                            </tbody>
-                            <tbody>
-                                <tr>
-                                    <td colspan="3" style="text-align: center; padding: 10px; font-weight: 600;">
-                                        Spread: 0.0150000 XLM (11.54%)
-                                    </td>
-                                </tr>
-                            </tbody>
-                            <tbody id="bidsTable">
-                                <tr class="bid-row">
-                                    <td class="bid-price">0.130000</td>
-                                    <td>900.00</td>
-                                    <td>117.0000000</td>
-                                </tr>
-                                <tr class="bid-row">
-                                    <td class="bid-price">0.128000</td>
-                                    <td>1,100.00</td>
-                                    <td>140.8000000</td>
-                                </tr>
-                                <tr class="bid-row">
-                                    <td class="bid-price">0.125000</td>
-                                    <td>600.00</td>
-                                    <td>75.0000000</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <div class="thin-orderbook-warning">
-                        The orderbook for this pair is thin. To get a better price, create an offer without taking an existing one.
-                    </div>
-                    
-                    <div class="manage-offers">
-                        <div class="card">
-                            <div class="card-title">Manage offers</div>
+                <div class="right-panel">
+                    <div class="trade-panel">
+                        <div class="trade-section">
+                            <h3>Buy Laam</h3>
                             
-                            <div class="offer-section">
-                                <h4>Your buy offers</h4>
-                                <div class="no-offers">You have no buy offers for this orderbook.</div>
+                            <div class="form-group-sm">
+                                <label>Available: <span id="availXLM">0.00</span> XLM</label>
                             </div>
                             
-                            <div class="offer-section">
-                                <h4>Your sell offers</h4>
-                                <div class="no-offers">You have no sell offers for this orderbook.</div>
+                            <div class="form-group-sm">
+                                <label>Price</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="buyPrice" value="0.135" step="0.001">
+                                    <span class="unit">XLM</span>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="right-panel">
-                <div class="trade-panel">
-                    <div class="trade-section">
-                        <h3>Buy Laam</h3>
-                        
-                        <div class="form-group">
-                            <label>Available: 2.4355278 XLM</label>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Price</label>
-                            <div class="input-with-unit">
-                                <input type="number" value="0.135" step="0.001">
-                                <span class="unit">XLM</span>
+                            
+                            <div class="form-group-sm">
+                                <label>Amount</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="buyAmount" step="0.1">
+                                    <span class="unit">Laam</span>
+                                </div>
+                                <div class="percentage-buttons">
+                                    <button class="percentage-button" data-percent="25">25%</button>
+                                    <button class="percentage-button" data-percent="50">50%</button>
+                                    <button class="percentage-button" data-percent="75">75%</button>
+                                    <button class="percentage-button" data-percent="100">100%</button>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Amount</label>
-                            <div class="input-with-unit">
-                                <input type="number" step="0.1">
-                                <span class="unit">Laam</span>
+                            
+                            <div class="form-group-sm">
+                                <label>Total</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="buyTotal" readonly>
+                                    <span class="unit">XLM</span>
+                                </div>
                             </div>
-                            <div class="percentage-buttons">
-                                <button class="percentage-button">25%</button>
-                                <button class="percentage-button">50%</button>
-                                <button class="percentage-button">75%</button>
-                                <button class="percentage-button">100%</button>
-                            </div>
+                            
+                            <button class="buy-button" id="buyButton">Buy Laam</button>
                         </div>
                         
-                        <div class="form-group">
-                            <label>Total</label>
-                            <div class="input-with-unit">
-                                <input type="number" readonly>
-                                <span class="unit">XLM</span>
+                        <div class="trade-section">
+                            <h3>Sell Laam</h3>
+                            
+                            <div class="form-group-sm">
+                                <label>Available: <span id="availLaam">0.00</span> Laam</label>
                             </div>
-                        </div>
-                        
-                        <button class="buy-button">Buy Laam</button>
-                    </div>
-                    
-                    <div class="trade-section">
-                        <h3>Sell Laam</h3>
-                        
-                        <div class="form-group">
-                            <label>Available: 3,230.6557035 Laam</label>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Price</label>
-                            <div class="input-with-unit">
-                                <input type="number" value="0.135" step="0.001">
-                                <span class="unit">XLM</span>
+                            
+                            <div class="form-group-sm">
+                                <label>Price</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="sellPrice" value="0.135" step="0.001">
+                                    <span class="unit">XLM</span>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Amount</label>
-                            <div class="input-with-unit">
-                         <input type="number" step="0.1">
-                                <span class="unit">Laam</span>
+                            
+                            <div class="form-group-sm">
+                                <label>Amount</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="sellAmount" step="0.1">
+                                    <span class="unit">Laam</span>
+                                </div>
+                                <div class="percentage-buttons">
+                                    <button class="percentage-button" data-percent="25">25%</button>
+                                    <button class="percentage-button" data-percent="50">50%</button>
+                                    <button class="percentage-button" data-percent="75">75%</button>
+                                    <button class="percentage-button" data-percent="100">100%</button>
+                                </div>
                             </div>
-                            <div class="percentage-buttons">
-                                <button class="percentage-button">25%</button>
-                                <button class="percentage-button">50%</button>
-                                <button class="percentage-button">75%</button>
-                                <button class="percentage-button">100%</button>
+                            
+                            <div class="form-group-sm">
+                                <label>Total</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="sellTotal" readonly>
+                                    <span class="unit">XLM</span>
+                                </div>
                             </div>
+                            
+                            <button class="sell-button" id="sellButton">Sell Laam</button>
                         </div>
-                        
-                        <div class="form-group">
-                            <label>Total</label>
-                            <div class="input-with-unit">
-                                <input type="number" readonly>
-                                <span class="unit">XLM</span>
-                            </div>
-                        </div>
-                        
-                        <button class="sell-button">Sell Laam</button>
                     </div>
                 </div>
             </div>
@@ -635,6 +880,10 @@
     <script>
         // Initialize price chart
         document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is already logged in
+            checkAuthStatus();
+            
+            // Initialize chart
             const ctx = document.getElementById('priceChart').getContext('2d');
             
             // Sample price data
@@ -687,73 +936,190 @@
             document.querySelectorAll('.bid-row, .ask-row').forEach(row => {
                 row.addEventListener('click', function() {
                     const price = this.querySelector('.bid-price, .ask-price').textContent;
-                    const inputs = document.querySelectorAll('.trade-section input[type="number"]');
-                    inputs[0].value = price; // Set price in both buy and sell forms
-                    inputs[3].value = price; // Set price in both buy and sell forms
+                    document.getElementById('buyPrice').value = price;
+                    document.getElementById('sellPrice').value = price;
                     
                     // Calculate totals
-                    calculateTotal(0, 1, 2); // For buy form
-                    calculateTotal(3, 4, 5); // For sell form
+                    calculateTotal('buy');
+                    calculateTotal('sell');
                 });
             });
             
             // Add percentage button functionality
             document.querySelectorAll('.percentage-button').forEach(button => {
                 button.addEventListener('click', function() {
-                    const percentage = parseInt(this.textContent) / 100;
+                    const percentage = parseInt(this.getAttribute('data-percent')) / 100;
                     const section = this.closest('.trade-section');
-                    const availableText = section.querySelector('label').textContent;
-                    const available = parseFloat(availableText.replace(/,/g, '').match(/\d+\.?\d*/)[0]);
-                    const priceInput = section.querySelector('input[type="number"]');
-                    const amountInput = section.querySelectorAll('input[type="number"]')[1];
+                    const type = section.querySelector('h3').textContent.includes('Buy') ? 'buy' : 'sell';
                     
-                    if (section.querySelector('h3').textContent === 'Buy Laam') {
-                        // For buy form: calculate how much Laam we can buy with percentage of available XLM
-                        const price = parseFloat(priceInput.value);
+                    if (type === 'buy') {
+                        const available = 2.4355278; // Sample XLM balance
+                        const price = parseFloat(document.getElementById('buyPrice').value);
                         const xlmToSpend = available * percentage;
                         const laamAmount = xlmToSpend / price;
-                        amountInput.value = laamAmount.toFixed(2);
+                        document.getElementById('buyAmount').value = laamAmount.toFixed(2);
                     } else {
-                        // For sell form: calculate percentage of available Laam
+                        const available = 3230.6557035; // Sample Laam balance
                         const laamToSell = available * percentage;
-                        amountInput.value = laamToSell.toFixed(2);
+                        document.getElementById('sellAmount').value = laamToSell.toFixed(2);
                     }
                     
                     // Calculate total
-                    const index = Array.from(document.querySelectorAll('.trade-section')).indexOf(section);
-                    calculateTotal(index * 3, index * 3 + 1, index * 3 + 2);
+                    calculateTotal(type);
                 });
             });
             
             // Add input event listeners for real-time calculation
-            const inputs = document.querySelectorAll('.trade-section input[type="number"]');
-            inputs[0].addEventListener('input', () => calculateTotal(0, 1, 2));
-            inputs[1].addEventListener('input', () => calculateTotal(0, 1, 2));
-            inputs[3].addEventListener('input', () => calculateTotal(3, 4, 5));
-            inputs[4].addEventListener('input', () => calculateTotal(3, 4, 5));
+            document.getElementById('buyPrice').addEventListener('input', () => calculateTotal('buy'));
+            document.getElementById('buyAmount').addEventListener('input', () => calculateTotal('buy'));
+            document.getElementById('sellPrice').addEventListener('input', () => calculateTotal('sell'));
+            document.getElementById('sellAmount').addEventListener('input', () => calculateTotal('sell'));
             
             // Initial calculation
-            calculateTotal(0, 1, 2);
-            calculateTotal(3, 4, 5);
+            calculateTotal('buy');
+            calculateTotal('sell');
             
-            function calculateTotal(priceIndex, amountIndex, totalIndex) {
-                const price = parseFloat(inputs[priceIndex].value) || 0;
-                const amount = parseFloat(inputs[amountIndex].value) || 0;
-                const total = price * amount;
-                inputs[totalIndex].value = total.toFixed(7);
-            }
+            // Auth button event listeners
+            document.getElementById('importAndSaveBtn').addEventListener('click', importWallet);
+            document.getElementById('generateAccountBtn').addEventListener('click', generateWallet);
+            document.getElementById('unlockBtn').addEventListener('click', unlockWallet);
+            document.getElementById('resetWalletLink').addEventListener('click', resetWallet);
+            document.getElementById('logoutBtn').addEventListener('click', logout);
             
-            // Tab switching functionality
-            document.querySelectorAll('.chart-tab, .timeframe-tab, .orderbook-tab').forEach(tab => {
-                tab.addEventListener('click', function() {
-                    const parent = this.parentElement;
-                    parent.querySelectorAll('.active').forEach(activeTab => {
-                        activeTab.classList.remove('active');
-                    });
-                    this.classList.add('active');
+            // Trade button event listeners
+            document.getElementById('buyButton').addEventListener('click', () => executeTrade('buy'));
+            document.getElementById('sellButton').addEventListener('click', () => executeTrade('sell'));
+            
+            // Cancel offer event listeners
+            document.querySelectorAll('.offer-action').forEach(action => {
+                action.addEventListener('click', function() {
+                    const row = this.closest('tr');
+                    const price = row.cells[0].textContent;
+                    const amount = row.cells[1].textContent;
+                    const type = row.closest('.offer-section').querySelector('h4').textContent.includes('buy') ? 'buy' : 'sell';
+                    
+                    if (confirm(`Are you sure you want to cancel your ${type} offer for ${amount} at ${price}?`)) {
+                        row.remove();
+                        alert('Offer cancelled successfully!');
+                    }
                 });
             });
         });
+        
+        function calculateTotal(type) {
+            const price = parseFloat(document.getElementById(`${type}Price`).value) || 0;
+            const amount = parseFloat(document.getElementById(`${type}Amount`).value) || 0;
+            const total = price * amount;
+            document.getElementById(`${type}Total`).value = total.toFixed(7);
+        }
+        
+        function checkAuthStatus() {
+            // Check if wallet data exists in localStorage (simulated)
+            const walletData = localStorage.getItem('laam_wallet');
+            if (walletData) {
+                showTradingInterface();
+            } else {
+                showAuthInterface();
+            }
+        }
+        
+        function showAuthInterface() {
+            document.getElementById('authSection').classList.remove('hidden');
+            document.getElementById('tradingSection').classList.add('hidden');
+            document.getElementById('balanceInfo').classList.add('hidden');
+            document.getElementById('logoutBtn').classList.add('hidden');
+            
+            // Show initial view by default
+            document.getElementById('initialView').classList.remove('hidden');
+            document.getElementById('unlockView').classList.add('hidden');
+        }
+        
+        function showTradingInterface() {
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('tradingSection').classList.remove('hidden');
+            document.getElementById('balanceInfo').classList.remove('hidden');
+            document.getElementById('logoutBtn').classList.remove('hidden');
+            
+            // Set sample balances
+            document.getElementById('xlmBalance').textContent = '2.4355278';
+            document.getElementById('laamBalance').textContent = '3,230.6557035';
+            document.getElementById('availXLM').textContent = '2.4355278';
+            document.getElementById('availLaam').textContent = '3,230.6557035';
+        }
+        
+        function importWallet() {
+            const secretKey = document.getElementById('secretKeyInput').value;
+            const password = document.getElementById('savePasswordInput').value;
+            
+            if (!secretKey || !secretKey.startsWith('S') || secretKey.length !== 56) {
+                alert('Please enter a valid secret key (starting with S, 56 characters long)');
+                return;
+            }
+            
+            if (!password || password.length < 8) {
+                alert('Please enter a password with at least 8 characters');
+                return;
+            }
+            
+            // Simulate wallet import
+            localStorage.setItem('laam_wallet', 'encrypted_data_here');
+            showTradingInterface();
+            alert('Wallet imported successfully!');
+        }
+        
+        function generateWallet() {
+            // Simulate wallet generation
+            const publicKey = 'G' + 'A'.repeat(55);
+            const secretKey = 'S' + 'B'.repeat(55);
+            
+            alert(`New wallet generated!\n\nPublic Key: ${publicKey}\nSecret Key: ${secretKey}\n\nPlease save your secret key in a secure place. You will need it to access your wallet.`);
+            
+            // Pre-fill the secret key field
+            document.getElementById('secretKeyInput').value = secretKey;
+        }
+        
+        function unlockWallet() {
+            const password = document.getElementById('walletPassword').value;
+            
+            if (!password) {
+                alert('Please enter your password');
+                return;
+            }
+            
+            // Simulate wallet unlock
+            showTradingInterface();
+        }
+        
+        function resetWallet() {
+            if (confirm('Are you sure you want to reset your wallet? This will remove all saved data.')) {
+                localStorage.removeItem('laam_wallet');
+                showAuthInterface();
+                alert('Wallet has been reset. You can now import a new wallet.');
+            }
+        }
+        
+        function logout() {
+            showAuthInterface();
+            document.getElementById('unlockView').classList.add('hidden');
+            document.getElementById('initialView').classList.remove('hidden');
+        }
+        
+        function executeTrade(type) {
+            const price = parseFloat(document.getElementById(`${type}Price`).value);
+            const amount = parseFloat(document.getElementById(`${type}Amount`).value);
+            
+            if (!price || !amount) {
+                alert('Please enter both price and amount');
+                return;
+            }
+            
+            const total = price * amount;
+            alert(`${type === 'buy' ? 'Buy' : 'Sell'} order placed!\n\nAmount: ${amount} Laam\nPrice: ${price} XLM\nTotal: ${total.toFixed(7)} XLM`);
+            
+            // Reset form
+            document.getElementById(`${type}Amount`).value = '';
+            document.getElementById(`${type}Total`).value = '';
+        }
     </script>
 </body>
 </html>
