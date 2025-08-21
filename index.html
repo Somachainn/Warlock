@@ -1122,7 +1122,7 @@
             <button data-fill="75">75%</button>
             <button data-fill="100">100%</button>
           </div>
-          </div>
+        </div>
 
         <div class="totalBox">
           <div class="inputWrap">
@@ -1852,6 +1852,137 @@
       document.getElementById('editOrderModal').classList.remove('show');
     }
 
+    // Wallet storage keys
+    const STORAGE_KEYS = { encSecret: 'laam_enc_sk', pub: 'laam_pub', hint: 'laam_hint' };
+
+    function toggleAuth(showAuth) {
+      document.getElementById('authSection').classList.toggle('hidden', !showAuth);
+      document.getElementById('loggedInView').classList.toggle('hidden', showAuth);
+    }
+
+    async function fetchBalances(publicKey) {
+      try {
+        if (!server) initializeStellar();
+        const account = await server.loadAccount(publicKey);
+        let xlm = 0, laam = 0;
+        account.balances.forEach(b => {
+          if (b.asset_type === 'native') xlm = parseFloat(b.balance);
+          if (b.asset_code === LAAM_TOKEN.code && b.asset_issuer === LAAM_TOKEN.issuer) laam = parseFloat(b.balance);
+        });
+        document.getElementById('xlmBal').textContent = xlm.toFixed(2);
+        document.getElementById('laamBal').textContent = laam.toFixed(2);
+        document.getElementById('xlmPrice').textContent = xlmPriceUSD.toFixed(2);
+        const laamPrice = 0.06; // placeholder
+        document.getElementById('laamPrice').textContent = laamPrice.toFixed(2);
+        document.getElementById('xlmUsd').textContent = (xlm * xlmPriceUSD).toFixed(2);
+        document.getElementById('laamUsd').textContent = (laam * laamPrice).toFixed(2);
+      } catch (e) {
+        console.warn('Failed to fetch balances:', e);
+      }
+    }
+
+    function afterLoginSetup() {
+      // show public key
+      document.getElementById('pubKey').textContent = currentKeypair ? currentKeypair.publicKey() : '-';
+      toggleAuth(false);
+      fetchBalances(currentKeypair.publicKey());
+      // load sections
+      fetchOrderbook();
+      loadMyOffers();
+    }
+
+    // Import and save wallet
+    function importAndSaveWallet() {
+      try {
+        const secret = document.getElementById('secretKeyInput').value.trim();
+        const password = document.getElementById('savePasswordInput').value;
+        if (!secret || !secret.startsWith('S')) return showError('Gali Secret Key sax ah (S...)');
+        if (!password || password.length < 8) return showError('Password-ku ha ahaado ugu yaraan 8 xaraf');
+        const kp = StellarSdk.Keypair.fromSecret(secret);
+        const enc = encryptSecretKey(secret, password);
+        localStorage.setItem(STORAGE_KEYS.encSecret, enc);
+        localStorage.setItem(STORAGE_KEYS.pub, kp.publicKey());
+        localStorage.setItem(STORAGE_KEYS.hint, 'exists');
+        currentKeypair = kp;
+        showSuccess('Wallet-ka waa la kaydiyay oo waa la furay');
+        afterLoginSetup();
+      } catch (e) {
+        console.error(e);
+        showError('Secret key ma aha mid sax ah');
+      }
+    }
+
+    // Generate new account (local only)
+    function generateAccount() {
+      try {
+        generatedKeypair = StellarSdk.Keypair.random();
+        openKeyModal(generatedKeypair.secret(), generatedKeypair.publicKey());
+      } catch (e) {
+        showError('Ku guuldareystay in la abuuro key cusub');
+      }
+    }
+
+    function checkSavedWallet() {
+      const enc = localStorage.getItem(STORAGE_KEYS.encSecret);
+      if (enc) {
+        document.getElementById('initialView').classList.add('hidden');
+        document.getElementById('unlockView').classList.remove('hidden');
+      } else {
+        document.getElementById('unlockView').classList.add('hidden');
+        document.getElementById('initialView').classList.remove('hidden');
+      }
+    }
+
+    function unlockExistingWallet() {
+      const enc = localStorage.getItem(STORAGE_KEYS.encSecret);
+      const password = document.getElementById('walletPassword').value;
+      if (!enc) return showError('Wax kayd ah lama helin');
+      if (!password) return showError('Geli password-ka');
+      const secret = decryptSecretKey(enc, password);
+      if (!secret || !secret.startsWith('S')) return showError('Password khaldan ama xog xun');
+      try {
+        currentKeypair = StellarSdk.Keypair.fromSecret(secret);
+        showSuccess('Wallet waa la furay');
+        afterLoginSetup();
+      } catch (e) {
+        showError('Secret key sax ma aha');
+      }
+    }
+
+    function lockWallet() {
+      currentKeypair = null;
+      document.getElementById('walletPassword').value = '';
+      toggleAuth(true);
+      checkSavedWallet();
+    }
+
+    function resetWalletStorage() {
+      localStorage.removeItem(STORAGE_KEYS.encSecret);
+      localStorage.removeItem(STORAGE_KEYS.pub);
+      localStorage.removeItem(STORAGE_KEYS.hint);
+      document.getElementById('secretKeyInput').value = '';
+      document.getElementById('savePasswordInput').value = '';
+      document.getElementById('unlockView').classList.add('hidden');
+      document.getElementById('initialView').classList.remove('hidden');
+    }
+
+    // Simple UI bindings
+    function bindUIBasics() {
+      const sendToggle = document.getElementById('btnSendToggle');
+      if (sendToggle) {
+        sendToggle.addEventListener('click', () => {
+          const el = document.getElementById('sendForm');
+          el.style.display = el.style.display === 'block' ? 'none' : 'block';
+        });
+      }
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) logoutBtn.addEventListener('click', lockWallet);
+      const unlockBtn = document.getElementById('unlockBtn');
+      if (unlockBtn) unlockBtn.addEventListener('click', unlockExistingWallet);
+      const resetLink = document.getElementById('resetWalletLink');
+      if (resetLink) resetLink.addEventListener('click', function(e){ e.preventDefault(); resetWalletStorage(); });
+    }
+
     // Initialize the application
     document.addEventListener('DOMContentLoaded', function() {
       console.log('DOM loaded, initializing app...');
@@ -1859,9 +1990,14 @@
       initializeStellar();
       initializeAssets();
       fetchXLMPrice();
+      checkSavedWallet();
+      bindUIBasics();
       
       // Load my offers on page load
       loadMyOffers();
+      
+      document.getElementById('importAndSaveBtn').addEventListener('click', importAndSaveWallet);
+      document.getElementById('generateAccountBtn').addEventListener('click', generateAccount);
       
       // Tab event listeners
       document.getElementById('overviewTab').addEventListener('click', () => switchTab('overview'));
