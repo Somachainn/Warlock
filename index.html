@@ -833,47 +833,47 @@
           <div class="tab" id="lastTradesTab">Last Trades</div>
         </div>
         
-        <!-- Overview Tab Content -->
-        <div id="overviewContent" class="tab-content">
-          <div class="overview-content">
-            <div class="price-display">
-              <span id="overviewLaamPriceXLM">0.135000</span> XLM
-            </div>
-            <div class="price-change positive" id="priceChange">+0.005000 (+3.85%)</div>
-            
-            <div class="chart-timeframes">
-              <button class="timeframe-btn active" data-timeframe="1D">1D</button>
-              <button class="timeframe-btn" data-timeframe="1W">1W</button>
-              <button class="timeframe-btn" data-timeframe="1M">1M</button>
-              <button class="timeframe-btn" data-timeframe="1Y">1Y</button>
-            </div>
-            
-            <!-- Chart container for Chart.js -->
-            <div class="chart-container">
-              <canvas id="priceChart"></canvas>
-            </div>
-            
-            <div class="market-stats">
-              <div class="stat-item">
-                <div class="stat-label">24h Volume</div>
-                <div class="stat-value">12,450 Laam</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-label">24h High</div>
-                <div class="stat-value">0.142000 XLM</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-label">24h Low</div>
-                <div class="stat-value">0.128000 XLM</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-label">Market Cap</div>
-                <div class="stat-value">180,253 XLM</div>
-              </div>
-            </div>
-          </div>
+          <!-- Overview Tab Content -->
+  <div id="overviewContent" class="tab-content">
+    <div class="overview-content">
+      <div class="price-display">
+        <span id="overviewLaamPriceXLM">Loading...</span> XLM
+      </div>
+      <div class="price-change" id="priceChange">--</div>
+
+      <div class="chart-timeframes">
+        <button class="timeframe-btn active" data-timeframe="1D">1D</button>
+        <button class="timeframe-btn" data-timeframe="1W">1W</button>
+        <button class="timeframe-btn" data-timeframe="1M">1M</button>
+        <button class="timeframe-btn" data-timeframe="1Y">1Y</button>
+      </div>
+
+      <div class="chart-container">
+        <canvas id="priceChart"></canvas>
+      </div>
+
+      <div class="market-stats">
+        <div class="stat-item">
+          <div class="stat-label">24h Volume</div>
+          <div class="stat-value" id="volume">--</div>
         </div>
-        
+        <div class="stat-item">
+          <div class="stat-label">24h High</div>
+          <div class="stat-value" id="high">--</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">24h Low</div>
+          <div class="stat-value" id="low">--</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Market Cap</div>
+          <div class="stat-value" id="marketcap">--</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    
         <!-- Orderbook Tab Content -->
         <div id="orderbookContent" class="tab-content active">
           <div class="orderbook-content">
@@ -2319,5 +2319,39 @@
       .then(() => console.log("Service Worker Registered"));
   }
   </script>
+    <!-- 🚀 Real Data Script -->
+  <script>
+    async function fetchLaamData() {
+      const assetCode = "LAAM";
+      const assetIssuer = "GAL4ECDAXNBMJYFCWIJ32HKVIRLCNEXY664CAZYI3EINQWPLXTMEPR64";
+
+      try {
+        const response = await fetch(
+          `https://horizon.stellar.org/assets?asset_code=${assetCode}&asset_issuer=${assetIssuer}`
+        );
+        const data = await response.json();
+
+        if (data._embedded && data._embedded.records.length > 0) {
+          const asset = data._embedded.records[0];
+
+          // Price
+          const priceElement = document.getElementById("overviewLaamPriceXLM");
+          if (priceElement) {
+            priceElement.textContent = parseFloat(asset.num_accounts / 100).toFixed(6); 
+          }
+
+          // Stats (dummy example – waxaad ka sameyn kartaa asset details kale)
+          document.getElementById("volume").textContent = asset.amount ? asset.amount : "--";
+          document.getElementById("high").textContent = "--"; 
+          document.getElementById("low").textContent = "--"; 
+          document.getElementById("marketcap").textContent = "--"; 
+        } else {
+          console.log("Asset not found.");
+        }
+      } catch (error) {
+        console.error("Error fetching asset data:", error);
+      }
+    }
+               
 </body>
 </html>
