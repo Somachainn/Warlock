@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Laam wallet</title>
   <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1976d2">
+<link rel="apple-touch-icon" href="https://i.ibb.co/r28SP1bN/20250802-225108.png">
     <!-- Favicon & OG Image -->
     <link rel="icon" type="image/png" href="https://i.ibb.co/r28SP1bN/20250802-225108.png">
     <link rel="apple-touch-icon" href="https://i.ibb.co/r28SP1bN/20250802-225108.png">
@@ -772,8 +774,7 @@
         <div style="display:flex; gap:10px; margin-top:16px; justify-content:center;">
           <button id="btnSendToggle">Send</button>
           <button id="addTrustlineBtn">Add Laam Trustline</button>
-            <!-- BADHANKA CUSUB KU DAR HALKAN -->
-  <button id="installAppBtn" class="btn-secondary" style="display: none;">Download App</button>
+           <button id="installAppBtn" class="btn-secondary" style="display: none;">Download App</button>
           <button id="logoutBtn" class="btn-danger">Lock Wallet</button>
         </div>
 
@@ -1875,45 +1876,7 @@
     ‎document.addEventListener('DOMContentLoaded', function() {
 ‎      console.log('DOM loaded, initializing...');
 ‎
-‎      // ----- BILAAB Koodhka Cusub ee PWA (Rakibaadda) -----
-‎      let deferredPrompt;
-‎      const installAppBtn = document.getElementById('installAppBtn');
-‎
-‎      window.addEventListener('beforeinstallprompt', (e) => {
-‎          // Ka hortag ogeysiiska caadiga ah ee browser-ka
-‎          e.preventDefault();
-‎          // Keydi dhacdada si aad hadhow u isticmaasho
-‎          deferredPrompt = e;
-‎          // Muuji badhankaaga soo dejinta (Download App)
-‎          if (installAppBtn) {
-‎              installAppBtn.style.display = 'block';
-‎              console.log('`beforeinstallprompt` event fired. Install button shown.');
-‎          }
-‎      });
-‎
-‎      if (installAppBtn) {
-‎          installAppBtn.addEventListener('click', async () => {
-‎              console.log('Install button clicked.');
-‎              if (deferredPrompt) {
-‎                  // Tusi ogeysiiska rakibidda
-‎                  deferredPrompt.prompt();
-‎                  // Sug inta isticmaaluhu ka jawaabayo
-‎                  const { outcome } = await deferredPrompt.userChoice;
-‎                  console.log(`User response to the install prompt: ${outcome}`);
-‎                  // Mar dambe ma isticmaali karno, waa la tuurayaa
-‎                  deferredPrompt = null;
-‎                  // Qari badhanka
-‎                  installAppBtn.style.display = 'none';
-‎              }
-‎          });
-‎      }
-‎
-‎      window.addEventListener('appinstalled', () => {
-‎          deferredPrompt = null;
-‎          console.log('PWA was installed successfully.');
-‎      });
-‎      // ----- DHAMAAD Koodhka Cusub ee PWA -----
-‎      
+‎        
 ‎      initializeStellar();
       initializeAssets();
       
