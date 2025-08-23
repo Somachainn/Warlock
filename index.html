@@ -2521,14 +2521,23 @@ async function createRealPriceChart(timeframe = '1D') {
     priceChart.destroy();
   }
   
-  // If we don't have enough data, show a message
-  if (prices.length < 2) {
-    ctx.font = "16px Arial";
-    ctx.fillStyle = "#666";
-    ctx.textAlign = "center";
-    ctx.fillText("auto chart", ctx.canvas.width / 2, ctx.canvas.height / 2);
-    return;
-  }
+  // If we don't have enough data, show the Stellar.expert iframe
+if (prices.length < 2) {
+  // Hide the canvas
+  ctx.canvas.style.display = 'none';
+  
+  // Create and show the Stellar.expert iframe
+  const iframe = document.createElement('iframe');
+  iframe.onLoad = "var c=this;window.addEventListener('message',function({data,source}){if(c&&source===c.contentWindow&&data.widget===c.src)c.style.height=data.height+'px'},false);";
+  iframe.src = "https://stellar.expert/widget/public/asset/price/Laam-GAL4ECDAXNBMJYFCWIJ32HKVIRLCNEXY664CAZYI3EINQWPLXTMEPR64";
+  iframe.style = "border:none;overflow:hidden;max-width:100%; min-width:300px;max-height:100%;min-height:200px;width:100%; height: 200px;";
+  
+  // Add the iframe to the chart container
+  const chartContainer = document.querySelector('.chart-container');
+  chartContainer.appendChild(iframe);
+  
+  return;
+}
   
   priceChart = new Chart(ctx, {
     type: 'line',
