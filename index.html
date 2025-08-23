@@ -842,6 +842,7 @@
     <div class="price-change" id="priceChange">Loading price change...</div>
     
     <div class="chart-timeframes">
+      <button class="timeframe-btn active" data-timeframe="1H">1H</button>
       <button class="timeframe-btn active" data-timeframe="1D">1D</button>
       <button class="timeframe-btn" data-timeframe="1W">1W</button>
       <button class="timeframe-btn" data-timeframe="1M">1M</button>
@@ -2525,7 +2526,7 @@ async function createRealPriceChart(timeframe = '1D') {
     ctx.font = "16px Arial";
     ctx.fillStyle = "#666";
     ctx.textAlign = "center";
-    ctx.fillText("Insufficient data for selected timeframe", ctx.canvas.width / 2, ctx.canvas.height / 2);
+    ctx.fillText("automatic data for selected timeframe", ctx.canvas.width / 2, ctx.canvas.height / 2);
     return;
   }
   
